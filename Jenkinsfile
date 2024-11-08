@@ -5,6 +5,8 @@ String credentialsId = 'github_ssh_key'
 String branchName = 'main'
 String repoName = 'ddb_backup_test'
 String envUrl = "git@github.com:Akhil0907/${repoName}.git"
+String sourceTable = 
+String destinationTable = 
 
 pipeline {
     agent any
@@ -71,14 +73,48 @@ pipeline {
                     // Restore the DynamoDB table to a specific point in time
                     sh '''
                     aws dynamodb restore-table-to-point-in-time \
-                    --source-table-name sandbox_poc_bkp4 \
-                    --target-table-name sandbox_poc_bkp5 \
+                    --source-table-name ${sourceTable} \
+                    --target-table-name ${destinationTable} \
                     --use-latest-restorable-time
                     '''
                 }
             }
         }
+
+         stage('Import table') {
+            steps {
+                script {
+                    // Restore the DynamoDB table to a specific point in time
+                    sh '''
+                     terraform import aws_dynamodb_table.content ${destinationTable}
+                    '''
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    // Restore the DynamoDB table to a specific point in time
+                    sh '''
+                     terraform plan -var="table_name=${destinationTable}"
+                    '''
+                }
+            }
+        }
+        
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    // Restore the DynamoDB table to a specific point in time
+                    sh '''
+                     terraform apply -var="table_name=${destinationTable}"
+                    '''
+                }
+            }
+        }
     }
+    
     post {
         always {
             // Clean up workspace
