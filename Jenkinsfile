@@ -73,7 +73,7 @@ pipeline {
                     aws dynamodb restore-table-to-point-in-time \
                     --source-table-name sandbox_poc_bkp3 \
                     --target-table-name sandbox_poc_bkp4 \
-                    --useLatestRestorableTime
+                    --use-latest-restorable-time
                     --region $AWS_REGION
                     '''
                 }
