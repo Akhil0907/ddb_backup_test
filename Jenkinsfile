@@ -65,17 +65,6 @@ pipeline {
             }
         }
 
-        stage('List DynamoDB Tables') {
-            steps {
-                    script {
-                            // List DynamoDB tables to verify AWS and Jenkins connection
-                            sh """
-                            aws dynamodb list-tables --region $AWS_REGION
-                            """
-                        }
-                    }
-                }
-
          stage('List buckets') {
             steps {
                     script {
