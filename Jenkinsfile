@@ -32,14 +32,6 @@ pipeline {
             }
         }
 
-        stage('Terraform Init') {
-            steps {
-                script {
-                    sh 'terraform init'
-                }
-            }
-        }
-
       stage('Install AWS CLI') {
          steps {
                  sh """
@@ -70,13 +62,42 @@ pipeline {
           stage('Restore Table using PITR') {
             steps {
                 script {
-                    // Restore the DynamoDB table to a specific point in time
                     sh '''
                     aws dynamodb restore-table-to-point-in-time \
                     --source-table-name ${sourceTable} \
                     --target-table-name ${destinationTable} \
                     --use-latest-restorable-time
                     '''
+                }
+            }
+        }
+
+         stage('Wait for Restore') {
+            steps {
+                script {
+                    sh '''
+                    aws dynamodb wait table-exists \
+                    --table-name ${destinationTable}
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Restored Table') {
+           steps  {
+               script  {
+                   sh '''
+                   aws dynamodb describe-table --table-name ${destinationTable}
+                   '''
+               }
+           }
+              
+        }
+              
+        stage('Terraform Init') {
+            steps {
+                script {
+                    sh 'terraform init'
                 }
             }
         }
