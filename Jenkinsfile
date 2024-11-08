@@ -59,22 +59,11 @@ pipeline {
                         def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
                         env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
                         env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
-                        env.AWS_SESSION_TOKEN = awsCredentials.SessionToken
+                        env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
                     }
                 }
             }
         }
-
-         stage('List buckets') {
-            steps {
-                    script {
-                            // List DynamoDB tables to verify AWS and Jenkins connection
-                            sh """
-                            aws s3 ls
-                            """
-                        }
-                    }
-                }
 
           stage('Restore Table using PITR') {
             steps {
@@ -84,6 +73,7 @@ pipeline {
                     aws dynamodb restore-table-to-point-in-time \
                     --source-table-name sandbox_poc_bkp3 \
                     --target-table-name sandbox_poc_bkp4 \
+                    --UseLatestRestorableTime
                     --region $AWS_REGION
                     '''
                 }
