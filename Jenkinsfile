@@ -50,20 +50,6 @@ pipeline {
             """
         }
     }
-        
-     /* stage('Read AWS Credentials') {
-            steps {
-                withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
-                    script {
-                        // Read AWS credentials from the JSON string
-                        def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
-                        env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
-                        env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
-                        env.AWS_SESSION_TOKEN = awsCredentials.SessionToken
-                    }
-                }
-            }
-        }*/
 
          stage('Read AWS Credentials') {
             steps {
@@ -89,6 +75,31 @@ pipeline {
                         }
                     }
                 }
+
+         stage('List buckets') {
+            steps {
+                    script {
+                            // List DynamoDB tables to verify AWS and Jenkins connection
+                            sh """
+                            aws s3 ls
+                            """
+                        }
+                    }
+                }
+
+          stage('Restore Table using PITR') {
+            steps {
+                script {
+                    // Restore the DynamoDB table to a specific point in time
+                    sh '''
+                    aws dynamodb restore-table-to-point-in-time \
+                    --source-table-name sandbox_poc_bkp3 \
+                    --target-table-name sandbox_poc_bkp4 \
+                    --region $AWS_REGION
+                    '''
+                }
+            }
+        }
     }
     post {
         always {
