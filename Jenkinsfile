@@ -6,6 +6,7 @@ String repoName = 'ddb_backup_test'
 String envUrl = "git@github.com:Akhil0907/${repoName}.git"
 String sourceTable = 
 String destinationTable = 
+String backupArn = 
 
 pipeline {
     agent any
@@ -70,6 +71,19 @@ pipeline {
             }
         }
 
+          stage('Restore Table using on demand backup') {
+            steps {
+                script {
+                    sh '''
+                    aws dynamodb restore-table-from-backup \
+                    --target-table-name ${destinationTable} \
+                    --backup-arn ${backupArn} \
+                    --use-latest-restorable-time
+                    '''
+                }
+            }
+        }
+    
          stage('Wait for Restore') {
             steps {
                 script {
