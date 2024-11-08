@@ -71,10 +71,9 @@ pipeline {
                     // Restore the DynamoDB table to a specific point in time
                     sh '''
                     aws dynamodb restore-table-to-point-in-time \
-                    --source-table-name sandbox_poc_bkp3 \
-                    --target-table-name sandbox_poc_bkp4 \
+                    --source-table-name sandbox_poc_bkp4 \
+                    --target-table-name sandbox_poc_bkp5 \
                     --use-latest-restorable-time
-                    --region $AWS_REGION
                     '''
                 }
             }
