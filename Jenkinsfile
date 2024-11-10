@@ -71,8 +71,6 @@ pipeline {
                 }
             }
         }
-    }
-}
 
 
           stage('Restore Table using PITR') {
@@ -88,18 +86,18 @@ pipeline {
             }
         }
 
-          stage('Restore Table using on demand backup') {
-            steps {
-                script {
-                    sh '''
-                    aws dynamodb restore-table-from-backup \
-                    --target-table-name ${destinationTable} \
-                    --backup-arn ${backupArn} \
-                    --use-latest-restorable-time
-                    '''
-                }
-            }
-        }
+        //   stage('Restore Table using on demand backup') {
+        //     steps {
+        //         script {
+        //             sh '''
+        //             aws dynamodb restore-table-from-backup \
+        //             --target-table-name ${destinationTable} \
+        //             --backup-arn ${backupArn} \
+        //             --use-latest-restorable-time
+        //             '''
+        //         }
+        //     }
+        // }
     
          stage('Wait for Restore') {
             steps {
