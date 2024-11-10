@@ -78,8 +78,8 @@ pipeline {
                 script {
                     sh '''
                     aws dynamodb restore-table-to-point-in-time \
-                    --source-table-name ${sourceTable} \
-                    --target-table-name ${destinationTable} \
+                    --source-table-name backup_table_3 \
+                    --target-table-name backup_table_4 \
                     --use-latest-restorable-time
                     '''
                 }
@@ -104,7 +104,7 @@ pipeline {
                 script {
                     sh '''
                     aws dynamodb wait table-exists \
-                    --table-name ${destinationTable}
+                    --table-name backup_table_4
                     '''
                 }
             }
@@ -114,7 +114,7 @@ pipeline {
            steps  {
                script  {
                    sh '''
-                   aws dynamodb describe-table --table-name ${destinationTable}
+                   aws dynamodb describe-table --table-name backup_table_4
                    '''
                }
            }
@@ -133,7 +133,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                     terraform import aws_dynamodb_table.content ${destinationTable}
+                     terraform import aws_dynamodb_table.content backup_table_4
                     '''
                 }
             }
@@ -143,7 +143,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                     terraform plan -var="table_name=${destinationTable}"
+                     terraform plan -var="table_name=backup_table_4"
                     '''
                 }
             }
@@ -153,7 +153,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                     terraform apply -var="table_name=${destinationTable}"
+                     terraform apply -var="table_name=backup_table_4"
                     '''
                 }
             }
