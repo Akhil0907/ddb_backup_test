@@ -4,9 +4,9 @@ String credentialsId = 'github_ssh_key'
 String branchName = 'main'
 String repoName = 'ddb_backup_test'
 String envUrl = "git@github.com:Akhil0907/${repoName}.git"
-String sourceTable = backup_table_3
-String destinationTable = backup_table_4
-String backupArn = 
+String sourceTable = 'backup_table_3'
+String destinationTable = 'backup_table_4'
+String backupArn = ''
 
 pipeline {
     agent any
