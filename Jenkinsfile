@@ -15,8 +15,6 @@ pipeline {
         AWS_REGION = 'us-east-1'
         AWS_CLI_DIR = "${env.WORKSPACE}/aws-cli"
         PATH = "${env.AWS_CLI_DIR}/v2/current/bin:${env.PATH}"
-        SOURCE_TABLE = "${sourceTable}"
-        DESTINATION_TABLE = "${destinationTable}"
     }
     
     tools {
@@ -80,8 +78,8 @@ pipeline {
                 script {
                     sh '''
                     aws dynamodb restore-table-to-point-in-time \
-                    --source-table-name ${env.sourceTable} \
-                    --target-table-name ${env.destinationTable} \
+                    --source-table-name ${sourceTable} \
+                    --target-table-name ${destinationTable} \
                     --use-latest-restorable-time
                     '''
                 }
@@ -106,7 +104,7 @@ pipeline {
                 script {
                     sh '''
                     aws dynamodb wait table-exists \
-                    --table-name ${env.destinationTable}
+                    --table-name ${destinationTable}
                     '''
                 }
             }
@@ -116,7 +114,7 @@ pipeline {
            steps  {
                script  {
                    sh '''
-                   aws dynamodb describe-table --table-name ${env.destinationTable}
+                   aws dynamodb describe-table --table-name ${destinationTable}
                    '''
                }
            }
@@ -135,7 +133,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                     terraform import aws_dynamodb_table.content ${env.destinationTable}
+                     terraform import aws_dynamodb_table.content ${destinationTable}
                     '''
                 }
             }
@@ -145,7 +143,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                     terraform plan -var="table_name=${env.destinationTable}"
+                     terraform plan -var="table_name=${destinationTable}"
                     '''
                 }
             }
@@ -155,7 +153,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                     terraform apply -var="table_name=${env.destinationTable}"
+                     terraform apply -var="table_name=${destinationTable}"
                     '''
                 }
             }
