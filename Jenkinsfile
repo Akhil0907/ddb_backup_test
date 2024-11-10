@@ -15,8 +15,8 @@ pipeline {
         AWS_REGION = 'us-east-1'
         AWS_CLI_DIR = "${env.WORKSPACE}/aws-cli"
         PATH = "${env.AWS_CLI_DIR}/v2/current/bin:${env.PATH}"
-        SOURCE_TABLE = sourceTable 
-        DESTINATION_TABLE = destinationTable
+        SOURCE_TABLE = "${sourceTable}"
+        DESTINATION_TABLE = "${destinationTable}"
     }
     
     tools {
