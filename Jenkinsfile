@@ -4,8 +4,8 @@ String credentialsId = 'github_ssh_key'
 String branchName = 'main'
 String repoName = 'ddb_backup_test'
 String envUrl = "git@github.com:Akhil0907/${repoName}.git"
-String sourceTable = 
-String destinationTable = 
+String sourceTable = backup_table_3
+String destinationTable = backup_table_4
 String backupArn = 
 
 pipeline {
@@ -45,18 +45,35 @@ pipeline {
         }
     }
 
-         stage('Read AWS Credentials') {
+        //  stage('Read AWS Credentials') {
+        //     steps {
+        //         withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
+        //             script {
+        //                 def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
+        //                 env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
+        //                 env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
+        //                 env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('Read AWS Credentials') {
             steps {
-                withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws_credentials'
+                ]]) {
                     script {
-                        def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
-                        env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
-                        env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
-                        env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
+                        env.AWS_ACCESS_KEY_ID = "${AWS_ACCESS_KEY_ID}"
+                        env.AWS_SECRET_ACCESS_KEY = "${AWS_SECRET_ACCESS_KEY}"
                     }
                 }
             }
         }
+    }
+}
+
 
           stage('Restore Table using PITR') {
             steps {
