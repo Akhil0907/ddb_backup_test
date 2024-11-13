@@ -4,9 +4,6 @@ String credentialsId = 'github_key'
 String branchName = 'main'
 String repoName = 'ddb_backup_test'
 String envUrl = "git@github.com:Akhil0907/${repoName}.git"
-String sourceTable = 'backup_table_3'
-String destinationTable = 'backup_table_4'
-String backupArn = ''
 
 pipeline {
     agent any
@@ -45,41 +42,26 @@ pipeline {
         }
     }
 
-        //  stage('Read AWS Credentials') {
-        //     steps {
-        //         withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
-        //             script {
-        //                 def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
-        //                 env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
-        //                 env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
-        //                 env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
-        //             }
-        //         }
-        //     }
-        // }
-
-        stage('Read AWS Credentials') {
+         stage('Read AWS Credentials') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws_credentials'
-                ]]) {
+                withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
                     script {
-                        env.AWS_ACCESS_KEY_ID = "${AWS_ACCESS_KEY_ID}"
-                        env.AWS_SECRET_ACCESS_KEY = "${AWS_SECRET_ACCESS_KEY}"
+                        def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
+                        env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
+                        env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
+                        env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
                     }
                 }
             }
         }
-
 
           stage('Restore Table using PITR') {
             steps {
                 script {
                     sh '''
                     aws dynamodb restore-table-to-point-in-time \
-                    --source-table-name backup_table_3 \
-                    --target-table-name backup_table_4 \
+                    --source-table-name sandbox_poc_bkp5 \
+                    --target-table-name sandbox_poc_bkp6 \
                     --use-latest-restorable-time
                     '''
                 }
@@ -99,67 +81,67 @@ pipeline {
         //     }
         // }
     
-         stage('Wait for Restore') {
-            steps {
-                script {
-                    sh '''
-                    aws dynamodb wait table-exists \
-                    --table-name backup_table_4
-                    '''
-                }
-            }
-        }
+    //      stage('Wait for Restore') {
+    //         steps {
+    //             script {
+    //                 sh '''
+    //                 aws dynamodb wait table-exists \
+    //                 --table-name backup_table_4
+    //                 '''
+    //             }
+    //         }
+    //     }
 
-        stage('Verify Restored Table') {
-           steps  {
-               script  {
-                   sh '''
-                   aws dynamodb describe-table --table-name backup_table_4
-                   '''
-               }
-           }
+    //     stage('Verify Restored Table') {
+    //        steps  {
+    //            script  {
+    //                sh '''
+    //                aws dynamodb describe-table --table-name backup_table_4
+    //                '''
+    //            }
+    //        }
               
-        }
+    //     }
               
-        stage('Terraform Init') {
-            steps {
-                script {
-                    sh 'terraform init'
-                }
-            }
-        }
+    //     stage('Terraform Init') {
+    //         steps {
+    //             script {
+    //                 sh 'terraform init'
+    //             }
+    //         }
+    //     }
 
-         stage('Import table') {
-            steps {
-                script {
-                    sh '''
-                     terraform import aws_dynamodb_table.content backup_table_4
-                    '''
-                }
-            }
-        }
+    //      stage('Import table') {
+    //         steps {
+    //             script {
+    //                 sh '''
+    //                  terraform import aws_dynamodb_table.content backup_table_4
+    //                 '''
+    //             }
+    //         }
+    //     }
 
-        stage('Terraform Plan') {
-            steps {
-                script {
-                    sh '''
-                     terraform plan -var="table_name=backup_table_4"
-                    '''
-                }
-            }
-        }
+    //     stage('Terraform Plan') {
+    //         steps {
+    //             script {
+    //                 sh '''
+    //                  terraform plan -var="table_name=backup_table_4"
+    //                 '''
+    //             }
+    //         }
+    //     }
         
-        stage('Terraform Apply') {
-            steps {
-                script {
-                    sh '''
-                     terraform apply -var="table_name=backup_table_4"
-                    '''
-                }
-            }
-        }
+    //     stage('Terraform Apply') {
+    //         steps {
+    //             script {
+    //                 sh '''
+    //                  terraform apply -var="table_name=backup_table_4"
+    //                 '''
+    //             }
+    //         }
+    //     }
+    // }
     }
-    
     post {
         always {
             cleanWs()
