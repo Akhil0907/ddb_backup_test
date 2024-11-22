@@ -8,11 +8,11 @@ variable "s3_bucket_name" {
   type        = string
 }
 
-variable "dynamodb_state_lock_table_name" {
-  description = "The name of the DynamoDB table for state locking"
-  type        = string
-  default     = "terraform-state-lock"
-}
+//variable "dynamodb_state_lock_table_name" {
+  //description = "The name of the DynamoDB table for state locking"
+  //type        = string
+  //default     = "terraform-state-lock"
+//}
 
 variable "aws_region" {
   description = "The AWS region to use"
