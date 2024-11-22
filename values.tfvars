@@ -1,0 +1,5 @@
+s3_bucket_name                   = "tf-test"
+aws_region                       = "us-east-1"
+state_key                        = "devops.tfstate"
+environment_name                 = "qa"
+dynamodb_table_name              = "ddb_backup_2"

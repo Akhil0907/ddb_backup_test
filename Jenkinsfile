@@ -1,13 +1,20 @@
 String awsCredentialsId = 'aws_credentials'
 String awsCredentialsFile = 'aws_credentials.json'
 String credentialsId = 'github_key'
-String branchName = 'main'
+String branchName = 'Akhil0907-patch1'
 String repoName = 'ddb_backup_test'
 String envUrl = "git@github.com:Akhil0907/${repoName}.git"
 
 pipeline {
     agent any
-
+    
+  parameters {
+    string(name: 'aws_region', defaultValue: params.aws_region_primary ?: 'us-east-1')
+    string(name: 'source_table_name', defaultValue: params.environment_name ?: '')
+    string(name: 'target_table_name', defaultValue: params.environment_name ?: '')
+    string(name: 'backup_arn', defaultValue: params.environment_name ?: '')
+  }
+    
     environment {
         AWS_REGION = 'us-east-1'
         AWS_CLI_DIR = "${env.WORKSPACE}/aws-cli"
@@ -60,8 +67,8 @@ pipeline {
                 script {
                     sh '''
                     aws dynamodb restore-table-to-point-in-time \
-                    --source-table-name sandbox_poc_bkp5 \
-                    --target-table-name sandbox_poc_bkp6 \
+                    --source-table-name ${source_table_name} \
+                    --target-table-name ${target_table_name}  \
                     --use-latest-restorable-time
                     '''
                 }
@@ -81,66 +88,56 @@ pipeline {
         //     }
         // }
     
-    //      stage('Wait for Restore') {
-    //         steps {
-    //             script {
-    //                 sh '''
-    //                 aws dynamodb wait table-exists \
-    //                 --table-name backup_table_4
-    //                 '''
-    //             }
-    //         }
-    //     }
-
-    //     stage('Verify Restored Table') {
-    //        steps  {
-    //            script  {
-    //                sh '''
-    //                aws dynamodb describe-table --table-name backup_table_4
-    //                '''
-    //            }
-    //        }
+         stage('Wait for Restore') {
+            steps {
+                script {
+                    sh '''
+                    aws dynamodb wait table-exists \
+                    --table-name ${target_table_name}
+                    '''
+                }
+            }
+        }
               
-    //     }
-              
-    //     stage('Terraform Init') {
-    //         steps {
-    //             script {
-    //                 sh 'terraform init'
-    //             }
-    //         }
-    //     }
+        stage('Terraform Init') {
+            steps {
+                script {
+                    sh '''
+                    terraform init -backend-config="bucket=tf-test-1" -backend-config="key=devops.tfstate"
+                    '''
+                }
+            }
+        }
 
-    //      stage('Import table') {
-    //         steps {
-    //             script {
-    //                 sh '''
-    //                  terraform import aws_dynamodb_table.content backup_table_4
-    //                 '''
-    //             }
-    //         }
-    //     }
+         stage('Import table') {
+            steps {
+                script {
+                    sh '''
+                     terraform import aws_dynamodb_table.content ${target_table_name}
+                    '''
+                }
+            }
+        }
 
-    //     stage('Terraform Plan') {
-    //         steps {
-    //             script {
-    //                 sh '''
-    //                  terraform plan -var="table_name=backup_table_4"
-    //                 '''
-    //             }
-    //         }
-    //     }
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    sh '''
+                     terraform plan -no-color -var-file="values.tfvars"
+                    '''
+                }
+            }
+        }
         
-    //     stage('Terraform Apply') {
-    //         steps {
-    //             script {
-    //                 sh '''
-    //                  terraform apply -var="table_name=backup_table_4"
-    //                 '''
-    //             }
-    //         }
-    //     }
-    // }
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    sh '''
+                     terraform apply -no-color -var-file="values.tfvars"
+                    '''
+                }
+            }
+        }
     }
     post {
         always {
