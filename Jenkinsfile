@@ -103,7 +103,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    terraform init -backend-config="bucket=tf-test" -backend-config="key=devops.tfstate"
+                    terraform init -backend-config="bucket=tf-test-1" -backend-config="key=devops.tfstate"
                     '''
                 }
             }
