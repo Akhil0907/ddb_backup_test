@@ -1,7 +1,7 @@
 String awsCredentialsId = 'aws_credentials'
 String awsCredentialsFile = 'aws_credentials.json'
 String credentialsId = 'github_key'
-String branchName = 'Akhil0907-patch1'
+String branchName = 'main'
 String repoName = 'ddb_backup_test'
 String envUrl = "git@github.com:Akhil0907/${repoName}.git"
 
