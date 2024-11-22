@@ -1,0 +1,6 @@
+s3_bucket_name                   = "bucket_name"
+dynamodb_state_lock_table_name   = "ddb-terraform-lock"
+aws_region                       = "us-east-1"
+state_key                        = "key"
+environment_name                 = "qa"
+dynamodb_table_name              = "value"
