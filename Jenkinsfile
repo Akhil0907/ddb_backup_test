@@ -62,15 +62,19 @@ pipeline {
         // }
 
 
-        stage('Read AWS Credentials') { 
-            steps { 
-                withCredentials([[$class:'AmazonWebServicesCredentialsBinding',credentialsId: 'aws_credentials' ]]){ 
-                    script {
-                        env.AWS_ACCESS_KEY_ID = "${AWS_ACCESS_KEY_ID}" 
-                        env.AWS_SECRET_ACCESS_KEY = "${AWS_SECRET_ACCESS_KEY}" } 
-                } 
-            } 
-        }
+     stage('Read AWS Credentials') { 
+         steps { 
+             withCredentials([[ 
+                 $class: 'AmazonWebServicesCredentialsBinding', 
+                 credentialsId: 'aws_credentials' ]]) 
+                { 
+                 script {
+                     env.AWS_ACCESS_KEY_ID = "${AWS_ACCESS_KEY_ID}"
+                     env.AWS_SECRET_ACCESS_KEY = "${AWS_SECRET_ACCESS_KEY}"
+                 } 
+                }
+         }
+     }
 
           stage('Restore Table using PITR') {
             steps {
