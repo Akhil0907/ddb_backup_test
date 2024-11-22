@@ -1,5 +1,4 @@
 String awsCredentialsId = 'aws_credentials'
-String awsCredentialsFile = 'aws_credentials.json'
 String credentialsId = 'github_key'
 String branchName = 'main'
 String repoName = 'ddb_backup_test'
@@ -49,17 +48,28 @@ pipeline {
         }
     }
 
-         stage('Read AWS Credentials') {
-            steps {
-                withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
+        //  stage('Read AWS Credentials') {
+        //     steps {
+        //         withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
+        //             script {
+        //                 def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
+        //                 env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
+        //                 env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
+        //                 env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
+        //             }
+        //         }
+        //     }
+        // }
+
+
+        stage('Read AWS Credentials') { 
+            steps { 
+                withCredentials([[$class:'AmazonWebServicesCredentialsBinding',credentialsId: 'aws_credentials' ]]){ 
                     script {
-                        def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
-                        env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
-                        env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
-                        env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
-                    }
-                }
-            }
+                        env.AWS_ACCESS_KEY_ID = "${AWS_ACCESS_KEY_ID}" 
+                        env.AWS_SECRET_ACCESS_KEY = "${AWS_SECRET_ACCESS_KEY}" } 
+                } 
+            } 
         }
 
           stage('Restore Table using PITR') {
