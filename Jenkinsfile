@@ -36,6 +36,19 @@ pipeline {
             }
         }
 
+       stage('Test')
+        { 
+            steps 
+            { 
+                script
+                { 
+                    echo "params.use_pitr_backup: ${params.use_pitr_backup}"
+                    echo "source_table_name: ${params.SOURCE_TABLE}"
+                    echo "target_table_name: ${params.DESTINATION_TABLE}"
+                }
+            } 
+        }
+
     //   stage('Install AWS CLI') {
     //      steps {
     //              sh """
