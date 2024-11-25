@@ -8,9 +8,9 @@ pipeline {
     agent any
     
   parameters {
-    string(name: 'aws_region', defaultValue: params.aws_region_primary ?: 'us-east-1')
-    string(name: 'source_table_name', defaultValue: params.source_table_name ?: 'test')
-    string(name: 'target_table_name', defaultValue: params.target_table_name ?: 'test1')
+    string(name: 'aws_region', defaultValue: params.aws_region ?: '')
+    string(name: 'source_table_name', defaultValue: params.source_table_name ?: '')
+    string(name: 'target_table_name', defaultValue: params.target_table_name ?: '')
     string(name: 'backup_arn', defaultValue: params.environment_name ?: '')
     booleanParam(name: 'use_pitr_backup', defaultValue: false, description: 'Use PITR for restore')
   }
