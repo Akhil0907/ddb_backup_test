@@ -9,8 +9,8 @@ pipeline {
     
   parameters {
     string(name: 'aws_region', defaultValue: params.aws_region_primary ?: 'us-east-1')
-    string(name: 'source_table_name', defaultValue: params.environment_name ?: '')
-    string(name: 'target_table_name', defaultValue: params.environment_name ?: '')
+    string(name: 'source_table_name', defaultValue:'')
+    string(name: 'target_table_name', defaultValue:'')
     string(name: 'backup_arn', defaultValue: params.environment_name ?: '')
     booleanParam(name: 'use_pitr_backup', defaultValue: false, description: 'Use PITR for restore')
   }
