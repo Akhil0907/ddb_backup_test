@@ -49,23 +49,26 @@ pipeline {
     //     }
     // }
 
-           stage('Install Homebrew') 
-             { 
-                 steps
-                 { 
-                     sh ''' 
-                     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" 
-                     '''
-                 } 
-             }
-          stage('Install AWS CLI') 
-          { 
-              steps {
-                  sh '''
-                  if ! command -v aws &> /dev/null then brew install awscli fi 
-                  ''' 
-              }
-          }
+          stage('Install Homebrew') 
+           { 
+               steps
+               { 
+                   sh ''' 
+                   sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+                   ''' 
+               } 
+           } 
+        stage('Install AWS CLI') 
+        { 
+            steps 
+            { 
+                sh ''' 
+                if ! command -v aws &> /dev/null then 
+                sudo brew install awscli 
+                fi 
+                '''
+            }
+        }
 
 
         //  stage('Read AWS Credentials') {
