@@ -54,7 +54,7 @@ pipeline {
                steps
                { 
                    sh ''' 
-                   sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+                   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
                    ''' 
                } 
            } 
@@ -64,7 +64,7 @@ pipeline {
             { 
                 sh ''' 
                 if ! command -v aws &> /dev/null then 
-                sudo brew install awscli 
+                brew install awscli 
                 fi 
                 '''
             }
