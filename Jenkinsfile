@@ -12,7 +12,7 @@ pipeline {
     string(name: 'source_table_name', defaultValue: params.environment_name ?: '')
     string(name: 'target_table_name', defaultValue: params.environment_name ?: '')
     string(name: 'backup_arn', defaultValue: params.environment_name ?: '')
-    boolean(name: 'use_pitr_backup', defaultValue: params.environment_name ?: 'true')
+    booleanParam(name: 'use_pitr_backup', defaultValue: false, description: 'Use PITR for restore')
   }
     
     environment {
@@ -80,7 +80,7 @@ pipeline {
         stage('Restore Table') {
             steps { 
                 script { 
-                    if (${use_pitr_backup}) 
+                    if (params.use_pitr_backup) 
                     { 
                         sh '''
                         aws dynamodb restore-table-to-point-in-time --source-table-name ${env.SOURCE_TABLE} --target-table-name ${env.DESTINATION_TABLE} --use-latest-restorable-time
