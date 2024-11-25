@@ -43,8 +43,8 @@ pipeline {
                 script
                 { 
                     echo "params.use_pitr_backup: ${params.use_pitr_backup}"
-                    echo "source_table_name: ${params.SOURCE_TABLE}"
-                    echo "target_table_name: ${params.DESTINATION_TABLE}"
+                    echo "source_table_name: ${source_table_name}"
+                    echo "target_table_name: ${target_table_name}"
                 }
             } 
         }
