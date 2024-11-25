@@ -12,7 +12,7 @@ pipeline {
     string(name: 'source_table_name', defaultValue: params.environment_name ?: '')
     string(name: 'target_table_name', defaultValue: params.environment_name ?: '')
     string(name: 'backup_arn', defaultValue: params.environment_name ?: '')
-    booleanParam(name: 'use_pitr_backup', defaultValue: params.environment_name ?: 'true')
+    boolean(name: 'use_pitr_backup', defaultValue: params.environment_name ?: 'true')
   }
     
     environment {
