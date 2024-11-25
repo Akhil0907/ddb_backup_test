@@ -80,7 +80,7 @@ pipeline {
         stage('Restore Table') {
             steps { 
                 script { 
-                    if ($use_pitr) 
+                    if (${use_pitr}) 
                     { 
                         sh '''
                         aws dynamodb restore-table-to-point-in-time --source-table-name ${env.SOURCE_TABLE} --target-table-name ${env.DESTINATION_TABLE} --use-latest-restorable-time
