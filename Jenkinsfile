@@ -36,18 +36,37 @@ pipeline {
             }
         }
 
-      stage('Install AWS CLI') {
-         steps {
-                 sh """
-                if ! command -v aws &> /dev/null
-               then
-                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                unzip awscliv2.zip
-                ./aws/install -i ${AWS_CLI_DIR} -b ${AWS_CLI_DIR}/bin
-            fi
-            """
-        }
-    }
+    //   stage('Install AWS CLI') {
+    //      steps {
+    //              sh """
+    //             if ! command -v aws &> /dev/null
+    //            then
+    //             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    //             unzip awscliv2.zip
+    //             ./aws/install -i ${AWS_CLI_DIR} -b ${AWS_CLI_DIR}/bin
+    //         fi
+    //         """
+    //     }
+    // }
+
+           stage('Install Homebrew') 
+             { 
+                 steps
+                 { 
+                     sh ''' 
+                     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" 
+                     '''
+                 } 
+             }
+          stage('Install AWS CLI') 
+          { 
+              steps {
+                  sh '''
+                  if ! command -v aws &> /dev/null then brew install awscli fi 
+                  ''' 
+              }
+          }
+
 
         //  stage('Read AWS Credentials') {
         //     steps {
