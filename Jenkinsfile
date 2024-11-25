@@ -12,6 +12,7 @@ pipeline {
     string(name: 'source_table_name', defaultValue: params.environment_name ?: '')
     string(name: 'target_table_name', defaultValue: params.environment_name ?: '')
     string(name: 'backup_arn', defaultValue: params.environment_name ?: '')
+    booleanParam(name: 'use_pitr', defaultValue: params.environment_name ?: 'true')
   }
     
     environment {
@@ -76,31 +77,24 @@ pipeline {
          }
      }
 
-          stage('Restore Table using PITR') {
-            steps {
-                script {
-                    sh '''
-                    aws dynamodb restore-table-to-point-in-time \
-                    --source-table-name ${source_table_name} \
-                    --target-table-name ${target_table_name}  \
-                    --use-latest-restorable-time
-                    '''
-                }
+        stage('Restore Table') {
+            steps { 
+                script { 
+                    if ($use_pitr) 
+                    { 
+                        sh '''
+                        aws dynamodb restore-table-to-point-in-time --source-table-name ${env.SOURCE_TABLE} --target-table-name ${env.DESTINATION_TABLE} --use-latest-restorable-time
+                        '''
+                    } 
+                    else
+                    { 
+                        sh ''' 
+                        aws dynamodb restore-table-from-backup --target-table-name ${env.DESTINATION_TABLE} --backup-arn ${env.BACKUP_ARN} --use-latest-restorable-time
+                        '''
+                    } 
+                } 
             }
         }
-
-        //   stage('Restore Table using on demand backup') {
-        //     steps {
-        //         script {
-        //             sh '''
-        //             aws dynamodb restore-table-from-backup \
-        //             --target-table-name ${destinationTable} \
-        //             --backup-arn ${backupArn} \
-        //             --use-latest-restorable-time
-        //             '''
-        //         }
-        //     }
-        // }
     
          stage('Wait for Restore') {
             steps {
