@@ -82,7 +82,9 @@ pipeline {
          stage('Terraform Init') {
            steps {
              script {
-                   sh 'terraform init -no-color -var-file="values.tfvars"
+                   sh '''
+                     terraform init -no-color -var-file="values.tfvars"
+                    '''
             }
            } 
      }
