@@ -49,11 +49,11 @@ pipeline {
         }
     }
 
-         stage('Read AWS Credentials') {
+       stage('Read AWS Credentials') {
             steps {
-                withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
+                withCredentials([string(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_JSON')]) {
                     script {
-                        def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
+                        def awsCredentials = readJSON file: AWS_CREDENTIALS_JSON
                         env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
                         env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
                         env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
