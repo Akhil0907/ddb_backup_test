@@ -57,11 +57,10 @@ pipeline {
 
    stage('Read AWS MFA Profile') {
     steps {
-        withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
+        withCredentials([file(credentialsId: 'aws-credentials-mfa', variable: 'AWS_CREDENTIALS_FILE')]) {
             script {
                 try {
-                    def jsonSlurper = new groovy.json.JsonSlurper()
-                    def awsCredentials = jsonSlurper.parseText(env.AWS_CREDENTIALS_JSON)
+                    def awsCredentials = readJSON file: env.AWS_CREDENTIALS_FILE
                     env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
                     env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
                     env.AWS_SESSION_TOKEN = awsCredentials.SessionToken
