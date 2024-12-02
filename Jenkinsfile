@@ -59,7 +59,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
                     script {
-                        def jsonSlurper = new groovy.json.JsonSlurper()
+                        def jsonSlurper = new JsonSlurper()
                         def awsCredentials = jsonSlurper.parseText(env.AWS_CREDENTIALS_JSON)
                         env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
                         env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
