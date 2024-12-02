@@ -66,37 +66,26 @@ pipeline {
             }
         }
     }*/
-        stage('Install jq') {
-            steps {
-                sh '''
-                if ! command -v jq &> /dev/null
-                then
-                    echo "jq could not be found, installing..."
-                    apt-get update && apt-get install -y jq
-                else
-                    echo "jq is already installed"
-                fi
-                '''
-            }
-        }
 
-     stage('Read AWS MFA Profile') {
+   stage('Read AWS MFA Profile') {
     steps {
-        withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
+        withCredentials([string(credentialsId: 'aws-credentials-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
             script {
                 try {
-                    def awsCredentials = sh(script: """
-                        echo '${env.AWS_CREDENTIALS_JSON}' | jq -r '.AccessKeyId, .SecretAccessKey, .SessionToken'
-                        """, returnStdout: true).trim().split('\n')
-                    env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-                    env.AWS_SECRET_ACCESS_KEY = awsCredentials[1]
-                    env.AWS_SESSION_TOKEN = awsCredentials[2]
+                    def jsonSlurper = new groovy.json.JsonSlurper()
+                    def awsCredentials = jsonSlurper.parseText(env.AWS_CREDENTIALS_JSON)
+                    env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
+                    env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
+                    env.AWS_SESSION_TOKEN = awsCredentials.SessionToken
+
+                    // Log the credentials for debugging purposes
                 } catch (Exception e) {
                     echo "An error occurred while reading AWS MFA Profile: ${e.message}"
                 }
             }
         }
     }
+}
      }
         stage('Check Table Exists') {
           steps {
