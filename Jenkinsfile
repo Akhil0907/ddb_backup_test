@@ -83,7 +83,7 @@ pipeline {
     steps {
         script {
             sh '''
-            no "no" | terraform init -no-color -var-file="values.tfvars"
+            yes "yes" | terraform init -no-color -var-file="values.tfvars"
             '''
         }
     }
