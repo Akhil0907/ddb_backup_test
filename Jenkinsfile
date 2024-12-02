@@ -42,7 +42,7 @@ pipeline {
         }
     }
 
-         stage('Read AWS Credentials') {
+         /*stage('Read AWS Credentials') {
             steps {
                 withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
                     script {
@@ -53,9 +53,30 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
 
-          stage('Restore Table using PITR') {
+        stage('Read AWS MFA Profile') {
+    steps {
+        withCredentials([string(credentialsId: 'aws-credentials-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
+            script {
+                def jsonSlurper = new groovy.json.JsonSlurper()
+                def awsCredentials = jsonSlurper.parseText(env.AWS_CREDENTIALS_JSON)
+                env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
+                env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
+                env.AWS_SESSION_TOKEN = awsCredentials.SessionToken
+            }
+        }
+    }
+}
+
+        stage('Check Table Exists') {
+          steps {
+            script {
+                aws dynamodb describe-table --table-name sandbox-bkp3
+             }
+         }
+    }
+          /*stage('Restore Table using PITR') {
             steps {
                 script {
                     sh '''
@@ -66,7 +87,7 @@ pipeline {
                     '''
                 }
             }
-        }
+        }*/
 
         //   stage('Restore Table using on demand backup') {
         //     steps {
