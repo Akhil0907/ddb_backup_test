@@ -89,7 +89,17 @@ pipeline {
     }
 }
 
-        stage('Extract and Calculate Table Name') {
+          stage('Extract and Calculate Table Name') {
+    steps {
+        script {
+            sh '''
+             terraform show -json
+            '''
+        }
+    }
+}
+
+        /*stage('Extract and Calculate Table Name') {
     steps {
         script {
             // Extract the table name using terraform show and JsonSlurper
@@ -120,7 +130,7 @@ pipeline {
             }
         }
     }
-}
+}*/
           /*stage('Restore Table using PITR') {
             steps {
                 script {
