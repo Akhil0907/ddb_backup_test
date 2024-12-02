@@ -1,0 +1,39 @@
+{
+  "version": 4,
+  "terraform_version": "1.0.0",
+  "serial": 1,
+  "lineage": "abcd1234-5678-90ef-ghij-klmnopqrstuv",
+  "outputs": {},
+  "resources": [
+    {
+      "module": "module.dynamodb_table",
+      "mode": "managed",
+      "type": "aws_dynamodb_table",
+      "name": "example",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:dynamodb:us-east-1:123456789012:table/example-table",
+            "name": "example-table",
+            "hash_key": "id",
+            "attribute": [
+              {
+                "name": "id",
+                "type": "S"
+              }
+            ],
+            "billing_mode": "PROVISIONED",
+            "read_capacity": 5,
+            "write_capacity": 5,
+            "stream_enabled": false,
+            "tags": {
+              "Name": "example-table"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
