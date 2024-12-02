@@ -69,7 +69,7 @@ pipeline {
 
         stage('Read AWS MFA Profile') {
     steps {
-        withCredentials([string(credentialsId: 'aws-credentials-mfa', variable: 'AWS_CREDENTIALS_FILE')]) {
+        withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_FILE')]) {
             script {
                 try {
                     def awsCredentials = sh(script: """
