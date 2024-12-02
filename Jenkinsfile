@@ -79,6 +79,14 @@ pipeline {
             }
         }*/
 
+         stage('Terraform Init') {
+           steps {
+             script {
+                   sh 'terraform init'
+            }
+           }
+     }
+
         stage('Extract and Calculate Table Name') {
     steps {
         script {
