@@ -79,15 +79,15 @@ pipeline {
             }
         }*/
 
-         stage('Terraform Init') {
-           steps {
-             script {
-                   sh '''
-                     terraform init -no-color -var-file="values.tfvars"
-                    '''
-            }
-           } 
-     }
+      stage('Terraform Init') {
+    steps {
+        script {
+            sh '''
+            yes "yes" | terraform init -no-color -input=false -var-file="values.tfvars"
+            '''
+        }
+    }
+}
 
         stage('Extract and Calculate Table Name') {
     steps {
