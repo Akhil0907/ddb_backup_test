@@ -56,23 +56,27 @@ pipeline {
         }*/
 
    stage('Read AWS MFA Profile') {
-            steps {
-                withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
-                    script {
-                        def jsonSlurper = new JsonSlurper()
-                        def awsCredentials = jsonSlurper.parseText(env.AWS_CREDENTIALS_JSON)
-                        env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
-                        env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
-                        env.AWS_SESSION_TOKEN = awsCredentials.SessionToken
+    steps {
+        withCredentials([string(credentialsId: 'aws-credentials-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
+            script {
+                try {
+                    def jsonSlurper = new groovy.json.JsonSlurper()
+                    def awsCredentials = jsonSlurper.parseText(env.AWS_CREDENTIALS_JSON)
+                    env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
+                    env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
+                    env.AWS_SESSION_TOKEN = awsCredentials.SessionToken
 
-                        // Log the credentials for debugging purposes
-                        echo "AWS_ACCESS_KEY_ID: ${env.AWS_ACCESS_KEY_ID}"
-                        echo "AWS_SECRET_ACCESS_KEY: ${env.AWS_SECRET_ACCESS_KEY}"
-                        echo "AWS_SESSION_TOKEN: ${env.AWS_SESSION_TOKEN}"
-                    }
+                    // Log the credentials for debugging purposes
+                    echo "AWS_ACCESS_KEY_ID: ${env.AWS_ACCESS_KEY_ID}"
+                    echo "AWS_SECRET_ACCESS_KEY: ${env.AWS_SECRET_ACCESS_KEY}"
+                    echo "AWS_SESSION_TOKEN: ${env.AWS_SESSION_TOKEN}"
+                } catch (Exception e) {
+                    echo "An error occurred while reading AWS MFA Profile: ${e.message}"
                 }
             }
         }
+    }
+}
 
         stage('Check Table Exists') {
           steps {
