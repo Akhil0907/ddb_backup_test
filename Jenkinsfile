@@ -1,4 +1,4 @@
-String credentialsId = 'github_key'
+String credentialsId = 'github_ssh_key'
 String awsCredentialsId = 'aws-credential-mfa'
 String branchName = 'main'
 String repoName = 'ddb_backup_test'
