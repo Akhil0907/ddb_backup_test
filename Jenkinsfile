@@ -54,7 +54,7 @@ pipeline {
             }
         }*/
 
-   stage('Read AWS MFA Profile') {
+  /* stage('Read AWS MFA Profile') {
     steps {
         withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_FILE')]) {
             script {
@@ -65,7 +65,31 @@ pipeline {
                 }
             }
         }
+    }*/
+
+        stage('Read AWS MFA Profile') {
+    steps {
+        withCredentials([string(credentialsId: 'aws-credentials-mfa', variable: 'AWS_CREDENTIALS_FILE')]) {
+            script {
+                try {
+                    def awsCredentials = sh(script: """
+                        cat ${env.AWS_CREDENTIALS_FILE} | jq -r '.AccessKeyId, .SecretAccessKey, .SessionToken'
+                        """, returnStdout: true).trim().split('\n')
+                    env.AWS_ACCESS_KEY_ID = awsCredentials[0]
+                    env.AWS_SECRET_ACCESS_KEY = awsCredentials[1]
+                    env.AWS_SESSION_TOKEN = awsCredentials[2]
+
+                    // Log the credentials for debugging purposes
+                    echo "AWS_ACCESS_KEY_ID: ${env.AWS_ACCESS_KEY_ID}"
+                    echo "AWS_SECRET_ACCESS_KEY: ${env.AWS_SECRET_ACCESS_KEY}"
+                    echo "AWS_SESSION_TOKEN: ${env.AWS_SESSION_TOKEN}"
+                } catch (Exception e) {
+                    echo "An error occurred while reading AWS MFA Profile: ${e.message}"
+                }
+            }
+        }
     }
+}
 
         stage('Check Table Exists') {
           steps {
