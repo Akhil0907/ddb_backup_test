@@ -66,8 +66,6 @@ pipeline {
             }
         }
     }*/
-
-         stages {
         stage('Install jq') {
             steps {
                 sh '''
