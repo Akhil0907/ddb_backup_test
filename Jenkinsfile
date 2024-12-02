@@ -1,5 +1,5 @@
-//String credentialsId = 'github_key'
-String credentialsId = 'aws-credential-mfa'
+String credentialsId = 'github_key'
+String awsCredentialsId = 'aws-credential-mfa'
 String branchName = 'main'
 String repoName = 'ddb_backup_test'
 String envUrl = "git@github.com:Akhil0907/${repoName}.git"
@@ -41,18 +41,18 @@ pipeline {
         }
     }
 
-  stage('Read AWS MFA Profile') {
-    steps {
-        withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_FILE')]) {
-            script {
-                    def awsCredentials = readJSON text: env.AWS_CREDENTIALS_FILE
-                    env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
-                    env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
-                    env.AWS_SESSION_TOKEN = awsCredentials.SessionToken
+     stage('Read AWS Credentials') {
+            steps {
+                withCredentials([string(awsCredentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_FILE')]) {
+                    script {
+                        def awsCredentials = readJSON text: AWS_CREDENTIALS_FILE
+                        env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
+                        env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
+                        env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
+                    }
                 }
             }
         }
-    }
 
    stage('Extract and Calculate Table Name') {
             steps {
