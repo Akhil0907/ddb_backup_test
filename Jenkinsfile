@@ -67,6 +67,21 @@ pipeline {
         }
     }*/
 
+         stages {
+        stage('Install jq') {
+            steps {
+                sh '''
+                if ! command -v jq &> /dev/null
+                then
+                    echo "jq could not be found, installing..."
+                    apt-get update && apt-get install -y jq
+                else
+                    echo "jq is already installed"
+                fi
+                '''
+            }
+        }
+
      stage('Read AWS MFA Profile') {
     steps {
         withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
