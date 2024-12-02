@@ -41,6 +41,14 @@ pipeline {
         }
     }
 
+        stage('List AWS Profiles') {
+            steps {
+                sh '''
+                aws configure list-profiles || true
+                '''
+            }
+        }
+
          /*stage('Read AWS Credentials') {
             steps {
                 withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
