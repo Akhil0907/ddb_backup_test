@@ -82,9 +82,9 @@ pipeline {
          stage('Terraform Init') {
            steps {
              script {
-                   sh 'terraform init'
+                   sh 'terraform init -no-color -var-file="values.tfvars"
             }
-           }
+           } 
      }
 
         stage('Extract and Calculate Table Name') {
