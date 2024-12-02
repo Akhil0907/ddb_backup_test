@@ -19,7 +19,7 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        /*stage('Checkout') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: credentialsId, keyFileVariable: 'SSH_KEY')]) {
                     sh """
@@ -27,7 +27,7 @@ pipeline {
                     """
                 }
             }
-        }
+        }*/
 
       stage('Install AWS CLI') {
          steps {
