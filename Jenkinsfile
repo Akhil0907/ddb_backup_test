@@ -18,7 +18,7 @@ pipeline {
     }
 
     stages {
-        /*stage('Checkout') {
+        stage('Checkout') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: credentialsId, keyFileVariable: 'SSH_KEY')]) {
                     sh """
@@ -26,7 +26,7 @@ pipeline {
                     """
                 }
             }
-        }*/
+        }
 
       stage('Install AWS CLI') {
          steps {
@@ -41,28 +41,7 @@ pipeline {
         }
     }
 
-        stage('List AWS Profiles') {
-            steps {
-                sh '''
-                aws configure list-profiles || true
-                '''
-            }
-        }
-
-         /*stage('Read AWS Credentials') {
-            steps {
-                withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
-                    script {
-                        def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
-                        env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
-                        env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
-                        env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
-                    }
-                }
-            }
-        }*/
-
-  /* stage('Read AWS MFA Profile') {
+  stage('Read AWS MFA Profile') {
     steps {
         withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_FILE')]) {
             script {
@@ -73,28 +52,9 @@ pipeline {
                 }
             }
         }
-    }*/
-
-   stage('Read AWS MFA Profile') {
-    steps {
-        withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
-            script {
-                try {
-                    def jsonSlurper = new groovy.json.JsonSlurper()
-                    def awsCredentials = jsonSlurper.parseText(env.AWS_CREDENTIALS_JSON)
-                    env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
-                    env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
-                    env.AWS_SESSION_TOKEN = awsCredentials.SessionToken
-
-                    // Log the credentials for debugging purposes
-                } catch (Exception e) {
-                    echo "An error occurred while reading AWS MFA Profile: ${e.message}"
-                }
-            }
-        }
     }
-}
-       stage('Extract and Calculate Table Name') {
+
+   stage('Extract and Calculate Table Name') {
             steps {
                 script {
     
