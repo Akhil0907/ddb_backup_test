@@ -80,7 +80,9 @@ pipeline {
         stage('Check Table Exists') {
           steps {
             script {
+                sh '''
                 aws dynamodb describe-table --table-name sandbox-bkp3
+                '''
              }
          }
     }
