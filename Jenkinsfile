@@ -1,4 +1,4 @@
-String awsCredentialsId = 'aws_credentials'
+String awsCredentialsId = 'aws-credential-mfa'
 String awsCredentialsFile = 'aws_credentials.json'
 String credentialsId = 'github_key'
 String branchName = 'Akhil0907-patch1'
@@ -51,7 +51,7 @@ pipeline {
 
        stage('Read AWS Credentials') {
             steps {
-                withCredentials([string(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_JSON')]) {
+                withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
                     script {
                         def awsCredentials = readJSON file: AWS_CREDENTIALS_JSON
                         env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
