@@ -94,15 +94,30 @@ pipeline {
         }
     }
 }
-        stage('Check Table Exists') {
-          steps {
-            script {
-                sh '''
-                aws dynamodb describe-table --table-name sandbox-bkp3
-                '''
-             }
-         }
-    }
+       stage('Extract and Calculate Table Name') {
+            steps {
+                script {
+    
+                    def currentTableName = sh(script: """
+                        terraform show -json | jq -r '
+                        .values.root_module.resources[] |
+                        select(.type == "aws_dynamodb_table" |
+                        .values.name
+                        '""", returnStdout: true).trim()
+
+                    def newTableName = "${currentTableName}-v1"
+                    def version = 1
+
+                    while (sh(script: "aws dynamodb describe-table --table-name ${newTableName}", returnStatus: true) == 0) {
+                        version++
+                        newTableName = "${currentTableName}-v${version}"
+                    }
+
+                    env.CURRENT_TABLE_NAME = currentTableName
+                    env.NEW_TABLE_NAME = newTableName
+                }
+            }
+        }
           /*stage('Restore Table using PITR') {
             steps {
                 script {
