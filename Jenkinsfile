@@ -86,7 +86,6 @@ pipeline {
         }
     }
 }
-     }
         stage('Check Table Exists') {
           steps {
             script {
