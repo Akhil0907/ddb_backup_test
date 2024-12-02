@@ -1,6 +1,5 @@
-String awsCredentialsId = 'aws_credentials'
-String awsCredentialsFile = 'aws_credentials.json'
-String credentialsId = 'github_key'
+//String credentialsId = 'github_key'
+String credentialsId = 'aws-credential-mfa'
 String branchName = 'main'
 String repoName = 'ddb_backup_test'
 String envUrl = "git@github.com:Akhil0907/${repoName}.git"
@@ -63,11 +62,6 @@ pipeline {
                     env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
                     env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
                     env.AWS_SESSION_TOKEN = awsCredentials.SessionToken
-
-                    // Log the credentials for debugging purposes
-                    echo "AWS_ACCESS_KEY_ID: ${env.AWS_ACCESS_KEY_ID}"
-                    echo "AWS_SECRET_ACCESS_KEY: ${env.AWS_SECRET_ACCESS_KEY}"
-                    echo "AWS_SESSION_TOKEN: ${env.AWS_SESSION_TOKEN}"
                 }
             }
         }
