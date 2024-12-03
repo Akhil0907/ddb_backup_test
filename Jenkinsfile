@@ -88,7 +88,7 @@ pipeline {
         }
     }
 }
-stage('Extract and Calculate Table Name') {
+stage('Append Version to Table Name') {
     steps {
         script {
             // Extract the table name using terraform state show and regular expressions
@@ -99,16 +99,9 @@ stage('Extract and Calculate Table Name') {
             if (currentTableName) {
                 echo "Extracted DynamoDB Table Name: ${currentTableName}"
 
-                // Initialize the new table name with the base table name and version
+                // Append a version number to the current table name
                 def newTableName = "${currentTableName}-v1"
-                def version = 1
-
-                // Check if the new table name already exists and increment the version if necessary
-                while (sh(script: "aws dynamodb describe-table --table-name ${newTableName}", returnStatus: true) == 0) {
-                    version++
-                    newTableName = "${currentTableName}-v${version}"
-                }
-                echo "Final New DynamoDB Table Name: ${newTableName}"
+                echo "New DynamoDB Table Name: ${newTableName}"
 
                 // Set environment variables for use in other stages
                 env.CURRENT_TABLE_NAME = currentTableName
@@ -119,6 +112,7 @@ stage('Extract and Calculate Table Name') {
         }
     }
 }
+
 
         /*stage('Extract and Calculate Table Name') {
     steps {
