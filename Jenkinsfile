@@ -113,7 +113,7 @@ pipeline {
                 """
               }
            }
-     */  }
+     }*/
 
      stage('Terraform Import') {
     steps {
