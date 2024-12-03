@@ -93,7 +93,7 @@ pipeline {
     steps {
         script {
             sh '''
-             terraform show -json
+             terraform state show 'aws_dynamodb_table.sandbox-bkp4'
             '''
         }
     }
