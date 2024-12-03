@@ -54,40 +54,7 @@ pipeline {
             }
         }
 
-  /* stage('Extract and Calculate Table Name') {
-            steps {
-                script {
-    
-                    def currentTableName = sh(script: """
-                        terraform show -json | jq -r '
-                        .values.root_module.resources[] |
-                        select(.type == "aws_dynamodb_table" |
-                        .values.name
-                        '""", returnStdout: true).trim()
-
-                    def newTableName = "${currentTableName}-v1"
-                    def version = 1
-
-                    while (sh(script: "aws dynamodb describe-table --table-name ${newTableName}", returnStatus: true) == 0) {
-                        version++
-                        newTableName = "${currentTableName}-v${version}"
-                    }
-
-                    env.CURRENT_TABLE_NAME = currentTableName
-                    env.NEW_TABLE_NAME = newTableName
-                }
-            }
-        }*/
-
-      stage('Terraform Init') {
-    steps {
-        script {
-            sh '''
-            no "no" | terraform init -no-color -var-file="values.tfvars"
-            '''
-        }
-    }
-}
+ 
 stage('Append Version to Table Name') {
     steps {
         script {
@@ -112,105 +79,40 @@ stage('Append Version to Table Name') {
         }
     }
 }
-
-
-        /*stage('Extract and Calculate Table Name') {
-    steps {
-        script {
-            // Extract the table name using terraform show and JsonSlurper
-            def terraformOutput = sh(script: "terraform show -json", returnStdout: true).trim()
-            def jsonSlurper = new groovy.json.JsonSlurper()
-            def terraformState = jsonSlurper.parseText(terraformOutput)
-            def currentTableName = terraformState.values.root_module.resources.find { it.type == "aws_dynamodb_table" }?.values?.name
-
-            if (currentTableName) {
-                echo "Extracted DynamoDB Table Name: ${currentTableName}"
-
-                // Initialize the new table name with the base table name and version
-                def newTableName = "${currentTableName}-v1"
-                def version = 1
-
-                // Check if the new table name already exists and increment the version if necessary
-                while (sh(script: "aws dynamodb describe-table --table-name ${newTableName}", returnStatus: true) == 0) {
-                    version++
-                    newTableName = "${currentTableName}-v${version}"
-                }
-                echo "Final New DynamoDB Table Name: ${newTableName}"
-
-                // Set environment variables for use in other stages
-                env.CURRENT_TABLE_NAME = currentTableName
-                env.NEW_TABLE_NAME = newTableName
-            } else {
-                error "DynamoDB table not found in Terraform state"
-            }
-        }
-    }
-}*/
-          /*stage('Restore Table using PITR') {
+         stage('Restore Table using PITR') {
             steps {
                 script {
                     sh '''
                     aws dynamodb restore-table-to-point-in-time \
-                    --source-table-name sandbox_poc_bkp5 \
-                    --target-table-name sandbox_poc_bkp6 \
+                    --source-table-name ${env.CURRENT_TABLE_NAME}" \
+                    --target-table-name ${env.NEW_TABLE_NAME} \
                     --use-latest-restorable-time
                     '''
                 }
             }
-        }*/
+         }
+     
+         stage('Wait for Restore') {
+            steps {
+              script {
+                 sh '''
+                 aws dynamodb wait table-exists \
+                 --table-name ${env.NEW_TABLE_NAME}
+                '''
+          }
+          }
+     }
 
-        //   stage('Restore Table using on demand backup') {
-        //     steps {
-        //         script {
-        //             sh '''
-        //             aws dynamodb restore-table-from-backup \
-        //             --target-table-name ${destinationTable} \
-        //             --backup-arn ${backupArn} \
-        //             --use-latest-restorable-time
-        //             '''
-        //         }
-        //     }
-        // }
-    
-    //      stage('Wait for Restore') {
-    //         steps {
-    //             script {
-    //                 sh '''
-    //                 aws dynamodb wait table-exists \
-    //                 --table-name backup_table_4
-    //                 '''
-    //             }
-    //         }
-    //     }
 
-    //     stage('Verify Restored Table') {
-    //        steps  {
-    //            script  {
-    //                sh '''
-    //                aws dynamodb describe-table --table-name backup_table_4
-    //                '''
-    //            }
-    //        }
-              
-    //     }
-              
-    //     stage('Terraform Init') {
-    //         steps {
-    //             script {
-    //                 sh 'terraform init'
-    //             }
-    //         }
-    //     }
-
-    //      stage('Import table') {
-    //         steps {
-    //             script {
-    //                 sh '''
-    //                  terraform import aws_dynamodb_table.content backup_table_4
-    //                 '''
-    //             }
-    //         }
-    //     }
+         stage('Import table') {
+        steps {
+              script {
+                  sh '''
+                   terraform import aws_dynamodb_table.content ${env.NEW_TABLE_NAME}
+                 '''
+             }
+         }
+        }
 
     //     stage('Terraform Plan') {
     //         steps {
