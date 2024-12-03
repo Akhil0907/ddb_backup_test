@@ -25,6 +25,7 @@ variable "aws_region" {
 variable "state_key" {
   description = "The path within the S3 bucket where the state file will be stored"
   type        = string
+  default     = "tfstate/sandbox/devops.tfstate"
 }
 
 variable "dynamodb_table_name" {
