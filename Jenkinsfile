@@ -125,7 +125,7 @@ pipeline {
 
             // Import the resource
             sh """
-            terraform import -input=false -var-file="values.tfvars" aws_dynamodb_table.content ${env.NEW_TABLE_NAME}
+            terraform import -var-file="values.tfvars" aws_dynamodb_table.content ${env.NEW_TABLE_NAME}
             """
         }
     }
@@ -135,7 +135,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                     terraform plan -input=false -var="dynamodb_table_name=${env.NEW_TABLE_NAME}"
+                     terraform plan -var="dynamodb_table_name=${env.NEW_TABLE_NAME}"
                     """
               }
             }
