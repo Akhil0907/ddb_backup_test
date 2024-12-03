@@ -63,31 +63,6 @@ pipeline {
         }
     }
 }
- 
-/*stage('Append Version to Table Name') {
-    steps {
-        script {
-            // Extract the table name using terraform state show and regular expressions
-            def terraformOutput = sh(script: "terraform state show aws_dynamodb_table.sandbox-bkp4", returnStdout: true).trim()
-            def matcher = terraformOutput =~ /name\s+=\s+"([^"]+)"/
-            def currentTableName = matcher ? matcher[0][1] : null
-
-            if (currentTableName) {
-                echo "Extracted DynamoDB Table Name: ${currentTableName}"
-
-                // Append a version number to the current table name
-                def newTableName = "${currentTableName}-v1"
-                echo "New DynamoDB Table Name: ${newTableName}"
-
-                // Set environment variables for use in other stages
-                env.CURRENT_TABLE_NAME = currentTableName
-                env.NEW_TABLE_NAME = newTableName
-            } else {
-                error "DynamoDB table name not found in Terraform state"
-            }
-        }
-    }
-}*/
 
         stage('Append Version to Table Name') {
     steps {
@@ -116,7 +91,7 @@ pipeline {
     }
 }
         
-         stage('Restore Table using PITR') {
+      /*   stage('Restore Table using PITR') {
     steps {
         script {
             sh """
@@ -129,7 +104,7 @@ pipeline {
     }
 }
      
-         stage('Wait for Restore') {
+        stage('Wait for Restore') {
             steps {
               script {
                  sh """
@@ -138,19 +113,13 @@ pipeline {
                 """
               }
            }
-       }
+     */  }
 
      stage('Terraform Import') {
-       environment {
-        DYNAMODB_TABLE_NAME = "${env.NEW_TABLE_NAME}"
-        ENVIRONMENT_NAME = "your-environment-name"
-        S3_BUCKET_NAME = "your-s3-bucket-name"
-        STATE_KEY = "your/state/key/path"
-     }
     steps {
         script {
             sh """
-            terraform import aws_dynamodb_table.content ${env.DYNAMODB_TABLE_NAME}
+            terraform import -input=false -var-file="values.tfvars" aws_dynamodb_table.content ${env.NEW_TABLE_NAME}
             """
         }
     }
