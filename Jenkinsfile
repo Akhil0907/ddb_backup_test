@@ -92,30 +92,21 @@ pipeline {
         stage('Append Version to Table Name') {
     steps {
         script {
-            // Extract the table name using terraform state show and regular expressions
             def terraformOutput = sh(script: "terraform state show aws_dynamodb_table.sandbox-bkp4", returnStdout: true).trim()
             def matcher = terraformOutput =~ /name\s+=\s+"([^"]+)"/
             def currentTableName = matcher ? matcher[0][1] : null
 
             if (currentTableName) {
-                echo "Extracted DynamoDB Table Name: ${currentTableName}"
-
-                // Append a version number to the current table name
                 def newTableName
                 def versionMatcher = currentTableName =~ /-v(\d+)$/
+                
                 if (versionMatcher) {
-                    // Extract the current version and increment it
                     def currentVersion = versionMatcher[0][1] as int
                     def newVersion = currentVersion + 1
                     newTableName = currentTableName.replaceFirst(/-v\d+$/, "-v${newVersion}")
                 } else {
-                    // Start with version 1 if there is no version in the table name
                     newTableName = "${currentTableName}-v1"
                 }
-
-                echo "New DynamoDB Table Name: ${newTableName}"
-
-                // Set environment variables for use in other stages
                 env.CURRENT_TABLE_NAME = currentTableName
                 env.NEW_TABLE_NAME = newTableName
             } else {
