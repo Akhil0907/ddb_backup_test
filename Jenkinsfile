@@ -70,17 +70,16 @@ pipeline {
         stage('Append Version to Table Name') {
     steps {
         script {
-            def terraformOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
-            def matcher = terraformOutput =~ /name\s+=\s+"([^"]+)"/
-            def currentTableName = matcher ? matcher[0][1] : null
+            def terraformStateOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
+            def tableNameMatcher = terraformStateOutput =~ /name\s+=\s+"([^"]+)"/
+            def currentTableName = tableNameMatcher ? tableNameMatcher[0][1] : null
 
             if (currentTableName) {
                 echo "Extracted DynamoDB Table Name: ${currentTableName}"
                 def newTableName
-                def versionMatcher = currentTableName =~ /-v(\d+)$/
-                
-                if (versionMatcher) {
-                    def currentVersion = versionMatcher[0][1] as int
+                def tableVersionMatcher = currentTableName =~ /-v(\d+)$/
+                if (tableVersionMatcher) {
+                    def currentVersion = tableVersionMatcher[0][1] as int
                     def newVersion = currentVersion + 1
                     newTableName = currentTableName.replaceFirst(/-v\d+$/, "-v${newVersion}")
                 } else {
