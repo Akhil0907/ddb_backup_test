@@ -7,6 +7,7 @@ variable "environment_name" {
 variable "s3_bucket_name" {
   description = "The name of the S3 bucket to store the Terraform state file"
   type        = string
+  default     = "sandbox-tf-test"
 }
 
 //variable "dynamodb_state_lock_table_name" {
