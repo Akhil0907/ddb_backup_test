@@ -116,7 +116,7 @@ pipeline {
               }
            }
      }*/
-
+/*
      stage('Terraform Import') {
     steps {
         script {
@@ -159,7 +159,7 @@ pipeline {
                }
              }
          }
-    
+    */
     }
     post {
         always {
