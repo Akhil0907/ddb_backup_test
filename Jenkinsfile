@@ -116,9 +116,9 @@ stage('Append Version to Table Name') {
          stage('Import table') {
         steps {
               script {
-                  sh '''
+                  sh """
                    terraform import aws_dynamodb_table.content ${env.NEW_TABLE_NAME}
-                 '''
+                 """
              }
          }
         }
