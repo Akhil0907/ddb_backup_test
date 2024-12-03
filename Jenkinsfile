@@ -93,7 +93,7 @@ stage('Append Version to Table Name') {
                 script {
                     sh '''
                     aws dynamodb restore-table-to-point-in-time \
-                    --source-table-name ${env.CURRENT_TABLE_NAME}" \
+                    --source-table-name ${env.CURRENT_TABLE_NAME} \
                     --target-table-name ${env.NEW_TABLE_NAME} \
                     --use-latest-restorable-time
                     '''
