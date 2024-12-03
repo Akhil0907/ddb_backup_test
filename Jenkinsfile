@@ -89,25 +89,25 @@ stage('Append Version to Table Name') {
     }
 }
          stage('Restore Table using PITR') {
-            steps {
-                script {
-                    sh '''
-                    aws dynamodb restore-table-to-point-in-time \
-                    --source-table-name ${env.CURRENT_TABLE_NAME} \
-                    --target-table-name ${env.NEW_TABLE_NAME} \
-                    --use-latest-restorable-time
-                    '''
-                }
-            }
-         }
+    steps {
+        script {
+            sh """
+            aws dynamodb restore-table-to-point-in-time \
+            --source-table-name ${env.CURRENT_TABLE_NAME} \
+            --target-table-name ${env.NEW_TABLE_NAME} \
+            --use-latest-restorable-time
+            """
+        }
+    }
+}
      
          stage('Wait for Restore') {
             steps {
               script {
-                 sh '''
+                 sh """
                  aws dynamodb wait table-exists \
                  --table-name ${env.NEW_TABLE_NAME}
-                '''
+                """
           }
           }
      }
