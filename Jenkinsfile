@@ -152,7 +152,7 @@ pipeline {
           steps {
                script {
                   sh """
-                    terraform apply -input=false -var="dynamodb_table_name=${env.NEW_TABLE_NAME}"
+                   yes "yes" | terraform apply -input=false -var="dynamodb_table_name=${env.NEW_TABLE_NAME}"
                   """
                }
              }
