@@ -12,7 +12,10 @@ pipeline {
         AWS_CLI_DIR = "${env.WORKSPACE}/aws-cli"
         PATH = "${env.AWS_CLI_DIR}/v2/current/bin:${env.PATH}"
     }
-    
+     parameters {
+    string(name: 'restore_from_backup_table_address', defaultValue: params.restore_from_backup_table_address ?: '')
+   
+  }
     tools {
         terraform 'terraform 1.9.8'
     }
@@ -67,7 +70,7 @@ pipeline {
         stage('Append Version to Table Name') {
     steps {
         script {
-            def terraformOutput = sh(script: "terraform state show aws_dynamodb_table.content", returnStdout: true).trim()
+            def terraformOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
             def matcher = terraformOutput =~ /name\s+=\s+"([^"]+)"/
             def currentTableName = matcher ? matcher[0][1] : null
 
