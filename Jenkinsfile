@@ -140,15 +140,21 @@ pipeline {
            }
        }
 
-         stage('Import table') {
-        steps {
-              script {
-                  sh """
-                   terraform import aws_dynamodb_table.content ${env.NEW_TABLE_NAME}
-                 """
-             }
-           }
+     stage('Terraform Import') {
+       environment {
+        DYNAMODB_TABLE_NAME = "${env.NEW_TABLE_NAME}"
+        ENVIRONMENT_NAME = "your-environment-name"
+        S3_BUCKET_NAME = "your-s3-bucket-name"
+        STATE_KEY = "your/state/key/path"
+     }
+    steps {
+        script {
+            sh """
+            terraform import aws_dynamodb_table.content ${env.DYNAMODB_TABLE_NAME}
+            """
         }
+    }
+}
 
         stage('Terraform Plan') {
             steps {
