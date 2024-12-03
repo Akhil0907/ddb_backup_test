@@ -118,6 +118,12 @@ pipeline {
      stage('Terraform Import') {
     steps {
         script {
+            // Remove the existing resource from the state
+            sh """
+            terraform state rm aws_dynamodb_table.content || true
+            """
+
+            // Import the resource
             sh """
             terraform import -input=false -var-file="values.tfvars" aws_dynamodb_table.content ${env.NEW_TABLE_NAME}
             """
