@@ -129,7 +129,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                     terraform plan -var="table_name=${env.NEW_TABLE_NAME}"
+                     terraform plan -input=false -var="table_name=${env.NEW_TABLE_NAME}"
                     """
               }
             }
@@ -146,7 +146,7 @@ pipeline {
           steps {
                script {
                   sh """
-                    terraform apply -var="table_name=${env.NEW_TABLE_NAME}"
+                    terraform apply -input=false -var="table_name=${env.NEW_TABLE_NAME}"
                   """
                }
              }
