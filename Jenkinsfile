@@ -108,10 +108,9 @@ stage('Append Version to Table Name') {
                  aws dynamodb wait table-exists \
                  --table-name ${env.NEW_TABLE_NAME}
                 """
-          }
-          }
-     }
-
+              }
+           }
+       }
 
          stage('Import table') {
         steps {
@@ -120,29 +119,37 @@ stage('Append Version to Table Name') {
                    terraform import aws_dynamodb_table.content ${env.NEW_TABLE_NAME}
                  """
              }
-         }
+           }
         }
 
-    //     stage('Terraform Plan') {
-    //         steps {
-    //             script {
-    //                 sh '''
-    //                  terraform plan -var="table_name=backup_table_4"
-    //                 '''
-    //             }
-    //         }
-    //     }
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    sh """
+                     terraform plan -var="table_name=${env.NEW_TABLE_NAME}"
+                    """
+              }
+            }
+        }
+
+         stage('Terraform Approve') {
+            steps {
+                input message: 'Do you want to proceed with Terraform Apply?', ok: 'Approve'
+            }
+        }
         
-    //     stage('Terraform Apply') {
-    //         steps {
-    //             script {
-    //                 sh '''
-    //                  terraform apply -var="table_name=backup_table_4"
-    //                 '''
-    //             }
-    //         }
-    //     }
-    // }
+        
+        stage('Terraform Apply') {
+          steps {
+               script {
+                  sh """
+                    terraform apply -var="table_name=${env.NEW_TABLE_NAME}"
+                  """
+               }
+             }
+         }
+      }
+    
     }
     post {
         always {
