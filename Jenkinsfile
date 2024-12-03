@@ -67,33 +67,41 @@ pipeline {
     }
 }
 
-        stage('Append Version to Table Name') {
+   stage('Extract and Calculate Table Name') {
     steps {
-        script {
-            def terraformStateOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
-            def tableNameMatcher = terraformStateOutput =~ /name\s+=\s+"([^"]+)"/
-            def currentTableName = tableNameMatcher ? tableNameMatcher[0][1] : null
+            script {
+                echo "Running terraform state show command"
+                def terraformStateOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
+                echo "Terraform state output: ${terraformStateOutput}"
 
-            if (currentTableName) {
-                echo "Extracted DynamoDB Table Name: ${currentTableName}"
-                def newTableName
-                def tableVersionMatcher = currentTableName =~ /-v(\d+)$/
-                if (tableVersionMatcher) {
-                    def currentVersion = tableVersionMatcher[0][1] as int
-                    def newVersion = currentVersion + 1
-                    newTableName = currentTableName.replaceFirst(/-v\d+$/, "-v${newVersion}")
+                // Remove ANSI escape codes
+                def cleanTerraformStateOutput = terraformStateOutput.replaceAll(/\x1B\[[0-9;]*[mK]/, '')
+                echo "Cleaned Terraform state output: ${cleanTerraformStateOutput}"
+
+                def tableNameMatcher = cleanTerraformStateOutput =~ /name\s+=\s+"([^"]+)"/
+                def currentTableName = tableNameMatcher ? tableNameMatcher[0][1] : null
+                echo "Current table name: ${currentTableName}"
+
+                if (currentTableName) {
+                    def newTableName
+                    def tableVersionMatcher = currentTableName =~ /-v(\d+)$/
+                    if (tableVersionMatcher) {
+                        def currentVersion = tableVersionMatcher[0][1] as int
+                        echo "Current version: ${currentVersion}"
+                        def newVersion = currentVersion + 1
+                        echo "New version: ${newVersion}"
+                        newTableName = currentTableName.replaceFirst(/-v\d+$/, "-v${newVersion}")
+                    } else {
+                        newTableName = "${currentTableName}-v1"
+                    }
+                    echo "New table name: ${newTableName}"
+                    env.CURRENT_TABLE_NAME = currentTableName
+                    env.NEW_TABLE_NAME = newTableName
                 } else {
-                    newTableName = "${currentTableName}-v1"
+                    echo "DynamoDB table name not found in Terraform state"
                 }
-                echo "New DynamoDB Table Name: ${newTableName}"
-                env.CURRENT_TABLE_NAME = currentTableName
-                env.NEW_TABLE_NAME = newTableName
-            } else {
-                error "DynamoDB table name not found in Terraform state"
             }
         }
-    }
-}
         
       /*   stage('Restore Table using PITR') {
     steps {
