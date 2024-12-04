@@ -62,7 +62,6 @@ pipeline {
           }
         }
 
-stages {
         stage('DynamoDB Table Restore') {
              when {
                 expression { return params.restore_from_backup_table_address?.trim() }
@@ -144,7 +143,6 @@ stages {
                     }
                 }
             }
-        }
        stage('Dummy Stage') {
         
             steps {
