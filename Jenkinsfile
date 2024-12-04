@@ -1,9 +1,10 @@
 // Declare variables as Groovy string variables
-String awsCredentialsId = 'aws-dev' // Replace with your actual credentials ID
-String gitCredentialId  = 'github_auth'
-String gitEnvDevBranchName  = 'main'
-String gitEnvRepoName = 'ddb-backup'
-String gitEnvUrl = "git@github01.hclpnp.com:hcl-software-bus-it/${gitEnvRepoName}.git"
+String credentialsId = 'github_ssh_key'
+String awsCredentialsId = 'aws-credential-mfa'
+String branchName = 'main'
+String repoName = 'ddb_backup_test'
+String envUrl = "git@github.com:Akhil0907/${repoName}.git"
+
 
 pipeline {
     agent any
@@ -11,7 +12,6 @@ pipeline {
   parameters {
     string(name: 'aws_region', defaultValue: params.aws_region_primary ?: 'us-east-1')
     string(name: 'restore_from_backup_table_address', defaultValue: params.restore_from_backup_table_address ?: '')
-    string(name: 'restore_from_backup_time', defaultValue: params.restore_from_backup_times ?: '')
    
   }
     environment {
@@ -20,48 +20,42 @@ pipeline {
     }
     
     tools {
-        terraform 'terraform 1.4.6'
+        terraform 'terraform 1.9.8'
     }
 
     stages {
-    stage('Install AWS CLI') {
-         steps {
-                 sh """
-                if ! command -v aws &> /dev/null
-               then
-                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                unzip awscliv2.zip
-                ./aws/install -i ${AWS_CLI_DIR} -b ${AWS_CLI_DIR}/bin
-            fi
-            """
-        }
-    }
-   
         stage('Checkout') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: gitCredentialId , keyFileVariable: 'SSH_KEY')]) {
                     sh """
-                    GIT_SSH_COMMAND="ssh -i \$SSH_KEY -o StrictHostKeyChecking=no" git clone --depth=1 --branch ${gitEnvDevBranchName} ${gitEnvUrl}
+                    GIT_SSH_COMMAND="ssh -i \$SSH_KEY -o StrictHostKeyChecking=no" git clone --depth=1 --branch ${branchName} ${envUrl}
                     """
                 }
             }
         }
 
-        stage('Terraform Init') {
+         stage('Read AWS Credentials') {
             steps {
-                withCredentials([[
-                $class: 'AmazonWebServicesCredentialsBinding',
-                credentialsId: 'aws-deployment-backend',
-                accessKeyVariable: 'BACKEND_ACCESS_KEY',
-                secretKeyVariable: 'BACKEND_SECRET_KEY'
-            ]]) {
-                withAWS(region:'us-east-1', credentials:"aws-deployment-dev") {
-                sh "terraform init -no-color -upgrade -backend-config=\"access_key=${BACKEND_ACCESS_KEY}\" -backend-config=\"secret_key=${BACKEND_SECRET_KEY}\""
-               }
+                withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
+                    script {
+                        def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
+                        env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
+                        env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
+                        env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
+                    }
+                }
             }
-          }
         }
 
+      stage('Terraform Init') {
+    steps {
+        script {
+            sh '''
+            terraform init -no-color -var-file="values.tfvars"
+            '''
+        }
+    }
+}
         stage('DynamoDB Table Restore') {
              when {
                 expression { return params.restore_from_backup_table_address?.trim() }
@@ -79,7 +73,7 @@ pipeline {
                     fi
                     """
                         // Extract the table name using terraform state show and regular expressions
-                        def terraformStateOutput = sh(script: "terraform state show aws_dynamodb_table.sandbox-bkp4", returnStdout: true).trim()
+                        def terraformStateOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
                         def tableNameMatcher = terraformStateOutput =~ /name\s+=\s+"([^"]+)"/
                         def currentTableName = tableNameMatcher ? tableNameMatcher[0][1] : null
 
