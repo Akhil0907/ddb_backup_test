@@ -95,6 +95,10 @@ pipeline {
                             }
                             env.CURRENT_TABLE_NAME = currentTableName
                             env.NEW_TABLE_NAME = newTableName
+                              } else {
+                        error "DynamoDB table name not found in Terraform state"
+                    }
+                }
 
                             echo "Extracted DynamoDB Table Name: ${currentTableName}"
                             echo "New DynamoDB Table Name: ${newTableName}"
@@ -135,14 +139,12 @@ pipeline {
                             // Apply the Terraform changes
                             sh """
                             terraform apply -no-color -var-file="values.tfvars"
-                            """  } else {
-                            error "DynamoDB table name not found in Terraform state"
-                        }
-                    } else {
-                        echo "restore_from_backup_table_address is not set. Skipping DynamoDB Table Restore steps."
-                    }
-                }
-            }
+                            """
+
+
+                            }
+                         }
+                    
        stage('Dummy Stage') {
         
             steps {
