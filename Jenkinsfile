@@ -23,10 +23,10 @@ pipeline {
         terraform 'terraform 1.9.8'
     }
 
-    stages {
+        stages {
         stage('Checkout') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: gitCredentialId , keyFileVariable: 'SSH_KEY')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: credentialsId, keyFileVariable: 'SSH_KEY')]) {
                     sh """
                     GIT_SSH_COMMAND="ssh -i \$SSH_KEY -o StrictHostKeyChecking=no" git clone --depth=1 --branch ${branchName} ${envUrl}
                     """
@@ -34,11 +34,11 @@ pipeline {
             }
         }
 
-         stage('Read AWS Credentials') {
+  stage('Read AWS Credentials') {
             steps {
-                withCredentials([file(credentialsId: 'aws_credentials', variable: 'AWS_CREDENTIALS_FILE')]) {
+                withCredentials([string(credentialsId: 'aws-credential-mfa', variable: 'AWS_CREDENTIALS_JSON')]) {
                     script {
-                        def awsCredentials = readJSON file: AWS_CREDENTIALS_FILE
+                        def awsCredentials = readJSON text: AWS_CREDENTIALS_JSON
                         env.AWS_ACCESS_KEY_ID = awsCredentials.AccessKeyId
                         env.AWS_SECRET_ACCESS_KEY = awsCredentials.SecretAccessKey
                         env.AWS_SESSION_TOKEN = awsCredentials.SessionToken 
@@ -46,6 +46,7 @@ pipeline {
                 }
             }
         }
+        
 
       stage('Terraform Init') {
     steps {
