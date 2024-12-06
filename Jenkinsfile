@@ -57,78 +57,90 @@ pipeline {
         }
     }
 }
+
         stage('DynamoDB Table Restore') {
-             when {
+            when {
                 expression { return params.restore_from_backup_table_address?.trim() }
             }
             steps {
                 script {
-                        sh '''
-                if ! command -v aws &> /dev/null
-               then
-                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                unzip awscliv2.zip
-                ./aws/install -i ${AWS_CLI_DIR} -b ${AWS_CLI_DIR}/bin
-            fi
-            '''
-                }
-               script {
-                        def terraformStateOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
-                        def cleanTerraformStateOutput = terraformStateOutput.replaceAll(/\x1B\[[0-9;]*[mK]/, '')
-                        def tableNameMatcher = cleanTerraformStateOutput =~ /name\s+=\s+"([^"]+)"/
-                        def currentTableName = tableNameMatcher ? tableNameMatcher[0][1] : null
+                    // Install AWS CLI if not already installed
+                    sh '''
+                    if ! command -v aws &> /dev/null
+                    then
+                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                        unzip awscliv2.zip
+                        ./aws/install
+                    fi
+                    '''
 
-                        if (currentTableName) {
-                            def newTableName
-                            def tableVersionMatcher = currentTableName =~ /-v(\d+)$/
-                            if (tableVersionMatcher) {
-                                def currentVersion = tableVersionMatcher[0][1] as int
-                                def newVersion = currentVersion + 1
-                                newTableName = currentTableName.replaceFirst(/-v\d+$/, "-v${newVersion}")
-                    } else {
-                                newTableName = "${currentTableName}-v2"
-                            }
-                            env.CURRENT_TABLE_NAME = currentTableName
-                            env.NEW_TABLE_NAME = newTableName
-                } else {
-                            error 'DynamoDB table name not found in Terraform state'
+                    // Extract the table name using terraform state show and regular expressions
+                    def terraformStateOutput = sh(script: "terraform state show ${params.restore_from_backup_table_address}", returnStdout: true).trim()
+                    def cleanTerraformStateOutput = terraformStateOutput.replaceAll(/\x1B\[[0-9;]*[mK]/, '')
+                    def tableNameMatcher = cleanTerraformStateOutput =~ /name\s+=\s+"([^"]+)"/
+                    def currentTableName = tableNameMatcher ? tableNameMatcher[0][1] : null
+
+                    if (currentTableName) {
+                        def newTableName
+                        def tableVersionMatcher = currentTableName =~ /-v(\d+)$/
+                        if (tableVersionMatcher) {
+                            def currentVersion = tableVersionMatcher[0][1] as int
+                            def newVersion = currentVersion + 1
+                            newTableName = currentTableName.replaceFirst(/-v\d+$/, "-v${newVersion}")
+                        } else {
+                            newTableName = "${currentTableName}-v1"
                         }
+                        env.CURRENT_TABLE_NAME = currentTableName
+                        env.NEW_TABLE_NAME = newTableName
+
+                        echo "Extracted DynamoDB Table Name: ${currentTableName}"
+                        echo "New DynamoDB Table Name: ${newTableName}"
+
+                        // Restore the table
+                        sh """
+                        aws dynamodb restore-table-to-point-in-time \
+                        --source-table-name ${env.CURRENT_TABLE_NAME} \
+                        --target-table-name ${env.NEW_TABLE_NAME} \
+                        --no-use-latest-restorable-time --restore-date-time ${params.restore_from_backup_time}
+                        """
+
+                        // Wait for the table to be restored
+                        sh """
+                        aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}
+                        """
+
+                        // Remove the existing state
+                        sh """
+                        terraform state rm ${params.restore_from_backup_table_address} || true
+                        """
+
+                        // Import the new table
+                        sh """
+                        terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}
+                        """
+
+                        // Plan the Terraform changes
+                        sh """
+                        terraform plan -no-color -var-file="values.tfvars"
+                        """
+
+                        // Apply the Terraform changes
+                        sh """
+                        terraform apply -no-color -var-file="values.tfvars" -auto-approve
+                        """
+                    } else {
+                        error 'DynamoDB table name not found in Terraform state'
                     }
-                         // Install AWS CLI if not already installed
-                         script {
-                            // Restore the table
-                            sh '''
-                            aws dynamodb restore-table-to-point-in-time \
-                            --source-table-name ${env.CURRENT_TABLE_NAME} \
-                            --target-table-name ${env.NEW_TABLE_NAME} \
-                            --no-use-latest-restorable-time --restore-date-time ${params.restore_from_backup_time}
-                            '''
-
-                            // Wait for the table to be restored
-                            sh 'aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}'
- 
-                            // Remove the existing state
-                            sh 'terraform state rm ${params.restore_from_backup_table_address} || true'
-                    
-                            // Import the new table
-                            sh 'terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}'
-
-                            // Plan the Terraform changes
-                            sh 'terraform plan -no-color -var-file="values.tfvars'
-
-                            // Apply the Terraform changes
-                            sh 'terraform apply -no-color -var-file="values.tfvars"'
-           
-
-                            }
-        }  }
-       stage('Dummy Stage') {
-        
-            steps {
-                echo "This is a dummy stage that will be skipped if the condition is false."
+                }
             }
         }
+    post {
+        always {
+            // Clean up workspace
+            cleanWs()
+        }
     }
+}
     
     post {
         always {
