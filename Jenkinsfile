@@ -99,27 +99,22 @@ pipeline {
                             error 'DynamoDB table name not found in Terraform state'
                         }
                         // Restore the table
-                        sh """
+                      sh '''
                         aws dynamodb restore-table-to-point-in-time \
                         --source-table-name ${env.CURRENT_TABLE_NAME} \
                         --target-table-name ${env.NEW_TABLE_NAME} \
                         --use-latest-restorable-time
-                        """
 
-                        // Wait for the table to be restored
-                        sh "aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}"
+                        aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}
 
-                        // Remove the existing state
-                        sh "terraform state rm ${params.restore_from_backup_table_address} || true"
-                
-                        // Import the new table
-                        sh "terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}"
+                        terraform state rm ${params.restore_from_backup_table_address} || true
 
-                        // Plan the Terraform changes
-                        sh "terraform plan -no-color -var-file="values.tfvars""
+                        terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}
 
-                        // Apply the Terraform changes
-                        sh "terraform apply -no-color -var-file="values.tfvars" -auto-approve"
+                        terraform plan -no-color -var-file="values.tfvars"
+
+                        terraform apply -no-color -var-file="values.tfvars" -auto-approve
+                        '''
        
                  
                 }
