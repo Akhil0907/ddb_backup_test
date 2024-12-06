@@ -134,14 +134,7 @@ pipeline {
                 }
             }
         }
-    post {
-        always {
-            // Clean up workspace
-            cleanWs()
-        }
-    }
-}
-    
+
     post {
         always {
             // Clean up workspace
