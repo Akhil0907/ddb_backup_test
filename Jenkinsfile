@@ -98,6 +98,14 @@ pipeline {
                       } else {
                             error 'DynamoDB table name not found in Terraform state'
                         }
+
+                      sh 'terraform --version'
+
+                      sh 'echo "this is multiline sh command with \
+                          arg1 \
+                          arg2 \
+                          ....\
+                          argN"'
                         // Restore the table
                       sh """
                         aws dynamodb restore-table-to-point-in-time \
