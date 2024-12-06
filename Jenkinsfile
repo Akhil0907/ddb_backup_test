@@ -107,19 +107,19 @@ pipeline {
                         '''
 
                         // Wait for the table to be restored
-                        sh 'aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}'
+                        sh "aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}"
 
                         // Remove the existing state
-                        sh 'terraform state rm ${params.restore_from_backup_table_address} || true'
+                        sh "terraform state rm ${params.restore_from_backup_table_address} || true"
                 
                         // Import the new table
-                        sh 'terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}'
+                        sh "terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}"
 
                         // Plan the Terraform changes
-                        sh 'terraform plan -no-color -var-file="values.tfvars"'
+                        sh "terraform plan -no-color -var-file="values.tfvars""
 
                         // Apply the Terraform changes
-                        sh 'terraform apply -no-color -var-file="values.tfvars" -auto-approve'
+                        sh "terraform apply -no-color -var-file="values.tfvars" -auto-approve"
        
                  
                 }
