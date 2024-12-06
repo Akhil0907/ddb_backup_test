@@ -101,7 +101,7 @@ pipeline {
                         aws dynamodb restore-table-to-point-in-time \
                         --source-table-name ${env.CURRENT_TABLE_NAME} \
                         --target-table-name ${env.NEW_TABLE_NAME} \
-                        --no-use-latest-restorable-time --restore-date-time ${params.restore_from_backup_time}
+                        --use-latest-restorable-time
                         """
 
                         // Wait for the table to be restored
