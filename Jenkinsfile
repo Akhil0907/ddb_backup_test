@@ -99,7 +99,7 @@ pipeline {
                             error 'DynamoDB table name not found in Terraform state'
                         }
 
-                      sh "terraform --version"
+                      sh "echo terraform --version"
 
                         // Restore the table
                       sh """
