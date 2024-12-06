@@ -95,7 +95,9 @@ pipeline {
 
                         echo "Extracted DynamoDB Table Name: ${currentTableName}"
                         echo "New DynamoDB Table Name: ${newTableName}"
-
+                      } else {
+                            error 'DynamoDB table name not found in Terraform state'
+                        }
                         // Restore the table
                         sh '''
                         aws dynamodb restore-table-to-point-in-time \
@@ -119,9 +121,7 @@ pipeline {
                         // Apply the Terraform changes
                         sh 'terraform apply -no-color -var-file="values.tfvars" -auto-approve'
        
-                    } else {
-                        error 'DynamoDB table name not found in Terraform state'
-                    }
+                 
                 }
             }
         }
