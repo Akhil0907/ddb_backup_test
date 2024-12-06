@@ -72,32 +72,28 @@ pipeline {
             fi
             '''
                 }
-                script {
-                        // Extract the table name using terraform state show and regular expressions
+               script {
                         def terraformStateOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
                         def cleanTerraformStateOutput = terraformStateOutput.replaceAll(/\x1B\[[0-9;]*[mK]/, '')
-                        def tableNameMatcher = terraformStateOutput =~ /name\s+=\s+"([^"]+)"/
+                        def tableNameMatcher = cleanTerraformStateOutput =~ /name\s+=\s+"([^"]+)"/
                         def currentTableName = tableNameMatcher ? tableNameMatcher[0][1] : null
 
                         if (currentTableName) {
                             def newTableName
-                            def tableVersionMatcher = currentTableName =~ /-v(\d+)$/ 
+                            def tableVersionMatcher = currentTableName =~ /-v(\d+)$/
                             if (tableVersionMatcher) {
                                 def currentVersion = tableVersionMatcher[0][1] as int
                                 def newVersion = currentVersion + 1
                                 newTableName = currentTableName.replaceFirst(/-v\d+$/, "-v${newVersion}")
-                            } else {
-                                newTableName = "${currentTableName}-v1"
+                    } else {
+                                newTableName = "${currentTableName}-v2"
                             }
                             env.CURRENT_TABLE_NAME = currentTableName
                             env.NEW_TABLE_NAME = newTableName
-                              } else {
-                        error "DynamoDB table name not found in Terraform state"
+                } else {
+                            error 'DynamoDB table name not found in Terraform state'
                         }
-
-                            echo "Extracted DynamoDB Table Name: ${currentTableName}"
-                            echo "New DynamoDB Table Name: ${newTableName}"
-                }
+                    }
                          // Install AWS CLI if not already installed
                          script {
                             // Restore the table
