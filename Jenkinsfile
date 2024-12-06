@@ -66,13 +66,13 @@ pipeline {
                 script {
                     // Install AWS CLI if not already installed
                     sh '''
-                    if ! command -v aws &> /dev/null
-                    then
-                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                        unzip awscliv2.zip
-                        ./aws/install
-                    fi
-                    '''
+                if ! command -v aws &> /dev/null
+               then
+                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                unzip awscliv2.zip
+                ./aws/install -i ${AWS_CLI_DIR} -b ${AWS_CLI_DIR}/bin
+            fi
+            '''
 
                     // Extract the table name using terraform state show and regular expressions
                     def terraformStateOutput = sh(script: "terraform state show ${params.restore_from_backup_table_address}", returnStdout: true).trim()
