@@ -99,12 +99,12 @@ pipeline {
                             error 'DynamoDB table name not found in Terraform state'
                         }
                         // Restore the table
-                        sh """
+                        sh '''
                         aws dynamodb restore-table-to-point-in-time \
                         --source-table-name ${env.CURRENT_TABLE_NAME} \
                         --target-table-name ${env.NEW_TABLE_NAME} \
                         --use-latest-restorable-time
-                        """
+                        '''
 
                         // Wait for the table to be restored
                         sh 'aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}'
