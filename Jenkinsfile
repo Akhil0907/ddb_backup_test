@@ -64,15 +64,7 @@ pipeline {
             steps {
                 script {
 
-                     // Install AWS CLI if not already installed
-                  sh '''
-                if ! command -v aws &> /dev/null
-               then
-                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                unzip awscliv2.zip
-                ./aws/install -i ${AWS_CLI_DIR} -b ${AWS_CLI_DIR}/bin
-            fi
-            '''
+                
                         // Extract the table name using terraform state show and regular expressions
                         def terraformStateOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
                         def cleanTerraformStateOutput = terraformStateOutput.replaceAll(/\x1B\[[0-9;]*[mK]/, '')
@@ -98,6 +90,15 @@ pipeline {
                             echo "Extracted DynamoDB Table Name: ${currentTableName}"
                             echo "New DynamoDB Table Name: ${newTableName}"
 
+                         // Install AWS CLI if not already installed
+                  sh '''
+                if ! command -v aws &> /dev/null
+               then
+                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                unzip awscliv2.zip
+                ./aws/install -i ${AWS_CLI_DIR} -b ${AWS_CLI_DIR}/bin
+            fi
+            '''
                             // Restore the table
                             sh '''
                             aws dynamodb restore-table-to-point-in-time \
