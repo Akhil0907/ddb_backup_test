@@ -98,11 +98,7 @@ pipeline {
                       } else {
                             error 'DynamoDB table name not found in Terraform state'
                         }
-                }
-            }
-           steps {
-                script {
-                
+              
                         // Restore the table
                      sh '''
                       aws dynamodb restore-table-to-point-in-time \
