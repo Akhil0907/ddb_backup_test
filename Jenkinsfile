@@ -102,7 +102,7 @@ pipeline {
             }
         }
                  stage('restore') {
-            
+              steps {
                     script {
                             // Restore the table
                      sh """
@@ -123,6 +123,7 @@ pipeline {
                 }
      
                 }
+        }
 
 
     post {
