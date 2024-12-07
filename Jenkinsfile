@@ -98,9 +98,13 @@ pipeline {
                       } else {
                             error 'DynamoDB table name not found in Terraform state'
                         }
-
+                }
+            }
+           steps {
+                script {
+                
                         // Restore the table
-                     /* sh '''
+                     sh '''
                       aws dynamodb restore-table-to-point-in-time \
                       --source-table-name ${env.CURRENT_TABLE_NAME} \
                       --target-table-name ${env.NEW_TABLE_NAME} \
@@ -112,7 +116,7 @@ pipeline {
                       terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}
                       terraform plan -no-color -var-file="values.tfvars"
                       terraform apply -no-color -var-file="values.tfvars" -auto-approve
-                      ''' */
+                      '''
 
        
                  
