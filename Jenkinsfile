@@ -109,8 +109,8 @@ pipeline {
                       aws dynamodb restore-table-to-point-in-time \
                       --source-table-name ${env.CURRENT_TABLE_NAME} \
                       --target-table-name ${env.NEW_TABLE_NAME} \
-                      --use-latest-restorable-time
-                      --region us-east-1
+                      --use-latest-restorable-time \
+                      --region ${aws_region}
                       """
                     
                       sh 'aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}'
