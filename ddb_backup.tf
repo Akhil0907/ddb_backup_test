@@ -13,7 +13,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region = "us-east-1"
   default_tags {
     tags = {
       terraform = true
@@ -22,7 +22,7 @@ provider "aws" {
 }
 
 resource "aws_dynamodb_table" "content" {
-  name         =  var.dynamodb_table_name
+  name         =  sandbox
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "pk"
   range_key    = "sk"
@@ -34,10 +34,6 @@ resource "aws_dynamodb_table" "content" {
   attribute {
     name = "sk"
     type = "S"
-  }
-  tags = {
-    terraform   = true
-    environment = var.environment_name
   }
   point_in_time_recovery {
     enabled = true
