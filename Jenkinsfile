@@ -100,26 +100,26 @@ pipeline {
 
                         echo "Extracted DynamoDB Table Name: ${currentTableName}"
                         echo "New DynamoDB Table Name: ${newTableName}"
-                      } else {
-                            error 'DynamoDB table name not found in Terraform state'
-                        }
+                     
                             // Restore the table
                      sh """
                       aws dynamodb restore-table-to-point-in-time \
                       --source-table-name ${env.CURRENT_TABLE_NAME} \
                       --target-table-name ${env.NEW_TABLE_NAME} \
                       --use-latest-restorable-time
-
-                      aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}"
-
-                      terraform state rm ${params.restore_from_backup_table_address} || true
-                      
-                      terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}
-                      
-                      terraform plan -no-color
-                      
-                      terraform apply -no-color -auto-approve
                       """
+                      sh "aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}""
+
+                      sh "terraform state rm ${params.restore_from_backup_table_address} || true"
+                      
+                      sh "terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}"
+                      
+                      sh 'terraform plan -no-color'
+                      
+                      sh 'terraform apply -no-color -auto-approve'
+                         } else {
+                            error 'DynamoDB table name not found in Terraform state'
+                        }
                     }
                 }
      
