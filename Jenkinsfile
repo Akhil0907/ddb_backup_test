@@ -110,13 +110,14 @@ pipeline {
                             aws dynamodb restore-table-to-point-in-time \
                                 --source-table-name ${env.CURRENT_TABLE_NAME} \
                                 --target-table-name ${env.NEW_TABLE_NAME} \
-                                --no-use-latest-restorable-time --restore-date-time ${restore_from_backup_time}
+                                --no-use-latest-restorable-time --restore-date-time ${restore_from_backup_time} \
+                                --region{aws_region}
                         """
                         sh "aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}"
                         sh "terraform state rm ${restore_from_backup_table_address} || true"
                         sh "terraform import ${restore_from_backup_table_address} ${env.NEW_TABLE_NAME}"
-                        sh "terraform plan -no-color -var-file=\"values.tfvars\""
-                        sh "terraform apply -no-color -var-file=\"values.tfvars\" -auto-approve"
+                        sh "terraform plan -no-color"
+                        sh "terraform apply -no-color -auto-approve"
                     }
                 }
         }
