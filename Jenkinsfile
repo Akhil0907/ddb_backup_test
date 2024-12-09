@@ -74,7 +74,6 @@ pipeline {
                 }
             }
             
-    stages {
         stage('Restore DynamoDB Table') {
             when {
                 expression { return params.restore_from_backup_table_address?.trim() }
@@ -119,7 +118,6 @@ pipeline {
                         sh "terraform apply -no-color -var-file=\"values.tfvars\" -auto-approve"
                     }
                 }
-            }
      
     }
 
