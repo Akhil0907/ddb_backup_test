@@ -22,7 +22,7 @@ provider "aws" {
 }
 
 resource "aws_dynamodb_table" "content" {
-  name         =  sandbox
+  name         =  "sandbox"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "pk"
   range_key    = "sk"
