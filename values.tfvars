@@ -1,5 +1,0 @@
-s3_bucket_name                   = "sandbox-tf-test"
-aws_region                       = "us-east-1"
-state_key                        = "tfstate/sandbox/devops.tfstate"
-environment_name                 = "dev"
-dynamodb_table_name              = "sandbox-bkp4"
