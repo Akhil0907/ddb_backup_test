@@ -12,6 +12,8 @@ pipeline {
   parameters {
     string(name: 'aws_region', defaultValue: params.aws_region_primary ?: 'us-east-1')
     string(name: 'restore_from_backup_table_address', defaultValue: params.restore_from_backup_table_address ?: '')
+    string(name: 'restore_from_backup_time', defaultValue: params.restore_from_backup_time ?: '')
+      
    
   }
     environment {
@@ -108,7 +110,8 @@ pipeline {
                       aws dynamodb restore-table-to-point-in-time \
                       --source-table-name ${env.CURRENT_TABLE_NAME} \
                       --target-table-name ${env.NEW_TABLE_NAME} \
-                      --use-latest-restorable-time
+                      --no-use-latest-restorable-time \
+                      --restore-date-time ${restore_from_backup_time}
                       """
                       sh "aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}"
 
