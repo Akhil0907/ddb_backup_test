@@ -108,16 +108,17 @@ pipeline {
                       --source-table-name ${env.CURRENT_TABLE_NAME} \
                       --target-table-name ${env.NEW_TABLE_NAME} \
                       --use-latest-restorable-time \
-                      --region ${aws_region}
-                      """
-                    
-                      sh "aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}"
 
-                      sh "terraform state rm ${params.restore_from_backup_table_address} || true"
-                      sh "terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}"
-                      sh "terraform plan -no-color -var-file="values.tfvars""
-                      sh "terraform apply -no-color -var-file="values.tfvars" -auto-approve"
-     
+                      aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}"
+
+                      terraform state rm ${params.restore_from_backup_table_address} || true
+                      
+                      terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}
+                      
+                      terraform plan -no-color -var-file="values.tfvars"
+                      
+                      terraform apply -no-color -var-file="values.tfvars" -auto-approve
+                      """
                     }
                 }
      
