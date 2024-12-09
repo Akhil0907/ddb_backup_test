@@ -79,7 +79,6 @@ pipeline {
                 expression { return params.restore_from_backup_table_address?.trim() }
             }
             steps {
-                withAWS(region: 'us-east-1', credentials: 'aws-deployment-dev') {
                     script {  
                         def terraformStateOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
                         def cleanTerraformStateOutput = terraformStateOutput.replaceAll(/\x1B\[[0-9;]*[mK]/, '')
@@ -121,12 +120,6 @@ pipeline {
                 }
             }
         }
-        }
-
-
-
-
-
     post {
         always {
             // Clean up workspace
