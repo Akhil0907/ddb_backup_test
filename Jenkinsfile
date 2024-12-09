@@ -77,7 +77,8 @@ pipeline {
         stage('Restore DynamoDB Table') {
             when {
                 expression { return params.restore_from_backup_table_address?.trim() }
-            }                    
+            }
+            steps {
                     // First script block to handle regex operations
                     script {
                         def terraformStateOutput = sh(script: "terraform state show ${restore_from_backup_table_address}", returnStdout: true).trim()
@@ -118,6 +119,7 @@ pipeline {
                         sh "terraform apply -no-color -var-file=\"values.tfvars\" -auto-approve"
                     }
                 }
+        }
      
     }
 
