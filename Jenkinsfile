@@ -108,7 +108,7 @@ pipeline {
                       --target-table-name ${env.NEW_TABLE_NAME} \
                       --use-latest-restorable-time
                       """
-                      sh "aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}""
+                      sh "aws dynamodb wait table-exists --table-name ${env.NEW_TABLE_NAME}"
 
                       sh "terraform state rm ${params.restore_from_backup_table_address} || true"
                       
