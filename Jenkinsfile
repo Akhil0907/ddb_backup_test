@@ -51,10 +51,26 @@ pipeline {
       stage('Terraform Init') {
     steps {
         script {
-            sh 'terraform init -no-color -var-file="values.tfvars"'
+            sh 'terraform init -no-color'
         }
     }
 }
+
+            stage('install cli') {
+                steps {
+                    script {
+                          // Install AWS CLI if not already installed
+                    sh '''
+                     if ! command -v aws &> /dev/null
+                     then
+                      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                      unzip awscliv2.zip
+                      ./aws/install -i ${AWS_CLI_DIR} -b ${AWS_CLI_DIR}/bin
+                     fi
+                    '''
+                    }
+                }
+            }
 
         stage('DynamoDB Table Restore') {
             when {
@@ -62,15 +78,6 @@ pipeline {
             }
             steps {
                 script {
-                    // Install AWS CLI if not already installed
-                    sh '''
-                if ! command -v aws &> /dev/null
-               then
-                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                unzip awscliv2.zip
-                ./aws/install -i ${AWS_CLI_DIR} -b ${AWS_CLI_DIR}/bin
-            fi
-            '''
 
                     // Extract the table name using terraform state show and regular expressions
                     def terraformStateOutput = sh(script: "terraform state show ${params.restore_from_backup_table_address}", returnStdout: true).trim()
@@ -96,12 +103,6 @@ pipeline {
                       } else {
                             error 'DynamoDB table name not found in Terraform state'
                         }
-                }
-            }
-        }
-                 stage('restore') {
-              steps {
-                    script {
                             // Restore the table
                      sh """
                       aws dynamodb restore-table-to-point-in-time \
@@ -115,9 +116,9 @@ pipeline {
                       
                       terraform import ${params.restore_from_backup_table_address} ${env.NEW_TABLE_NAME}
                       
-                      terraform plan -no-color -var-file="values.tfvars"
+                      terraform plan -no-color
                       
-                      terraform apply -no-color -var-file="values.tfvars" -auto-approve
+                      terraform apply -no-color -auto-approve
                       """
                     }
                 }
